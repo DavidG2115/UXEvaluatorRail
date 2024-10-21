@@ -91,4 +91,33 @@
 
 <a href="{% url 'editar_rubrica' rubrica.id %}" class="p-2 bg-yellow-500 text-white rounded-lg">Editar Rúbrica</a>
 
+<!-- Botón para abrir el modal -->
+<button id="deleteRubricButton" class="p-2 bg-red-500 text-white rounded-lg" onclick="openModal()">Eliminar Rúbrica</button>
+
+<!-- Modal -->
+<div id="deleteModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden">
+    <div class="bg-white p-6 rounded-lg shadow-lg">
+        <h3 class="text-lg font-bold">¿Estás seguro de que quieres eliminar esta rúbrica?</h3>
+        <div class="mt-4 flex justify-end">
+            <form action="{% url 'eliminar_rubrica' rubrica.id %}" method="POST">
+                {% csrf_token %}
+                <button type="button" class="mr-2 p-2 bg-gray-300 text-gray-700 rounded-lg" onclick="closeModal()">Cancelar</button>
+                <button type="submit" class="p-2 bg-red-500 text-white rounded-lg">Eliminar</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Script para abrir y cerrar el modal -->
+<script>
+    function openModal() {
+        document.getElementById('deleteModal').classList.remove('hidden');
+    }
+
+    function closeModal() {
+        document.getElementById('deleteModal').classList.add('hidden');
+    }
+</script>
+
+
 {% endblock %}

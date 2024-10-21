@@ -7,4 +7,5 @@ urlpatterns = [
     path('seleccionar/', seleccionar_rubrica, name='seleccionar_rubrica'),
     path('ver/<int:rubrica_id>/', ver_rubrica, name='ver_rubrica'),
     path('editar/<int:rubrica_id>/', editar_rubrica, name='editar_rubrica'),
+    path('eliminar/<int:rubrica_id>/', eliminar_rubrica, name='eliminar_rubrica'),
 ]

@@ -162,6 +162,24 @@ def editar_rubrica(request, rubrica_id):
                 if nombre:  # Solo crea si no está vacío
                     nueva_categoria = Categoria.objects.create(rubrica=rubrica, nombre=nombre, descripcion=descripcion)
 
+                    # Crear nuevos criterios para la nueva categoría
+                    nuevos_criterios_nombres = request.POST.getlist(f'nuevo_criterio_nombre_{nueva_categoria.id}[]')
+                    nuevos_criterios_descripciones = request.POST.getlist(f'nuevo_criterio_descripcion_{nueva_categoria.id}[]')
+
+                    for criterio_nombre, criterio_descripcion in zip(nuevos_criterios_nombres, nuevos_criterios_descripciones):
+                        if criterio_nombre:
+                            nuevo_criterio = Criterio.objects.create(categoria=nueva_categoria, nombre=criterio_nombre, descripcion=criterio_descripcion)
+
+                            # Crear descripciones de puntajes para el nuevo criterio
+                            for puntaje in range(1, 6):
+                                descripcion_puntaje = request.POST.get(f'descripcion_puntaje_nuevo_{nueva_categoria.id}_{puntaje}')
+                                if descripcion_puntaje:
+                                    DescripcionPuntaje.objects.create(
+                                        criterio=nuevo_criterio,
+                                        puntaje=puntaje,
+                                        descripcion=descripcion_puntaje
+                                    )
+
             return redirect('ver_rubrica', rubrica_id=rubrica.id)
 
     else:
@@ -176,3 +194,7 @@ def editar_rubrica(request, rubrica_id):
     }
     return render(request, 'rubricas/editar_rubrica.html', context)
 
+def eliminar_rubrica(request, rubrica_id):
+    rubrica = get_object_or_404(Rubrica, id=rubrica_id)
+    rubrica.delete()
+    return redirect('seleccionar_rubrica') 
