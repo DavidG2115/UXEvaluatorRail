@@ -18,39 +18,66 @@
                         <tr class="bg-gray-200">
                             <th class="border border-gray-300 p-2">Nombre del Criterio</th>
                             <th class="border border-gray-300 p-2">Descripción</th>
-                            <th class="border border-gray-300 p-2">Puntaje</th>
                             <th class="border border-gray-300 p-2">Comentario</th>
+                            <th class="border border-gray-300 p-2">Puntaje 1 (Muy Deficiente)</th>
+                            <th class="border border-gray-300 p-2">Puntaje 2 (Deficiente)</th>
+                            <th class="border border-gray-300 p-2">Puntaje 3 (Aceptable)</th>
+                            <th class="border border-gray-300 p-2">Puntaje 4 (Buena)</th>
+                            <th class="border border-gray-300 p-2">Puntaje 5 (Excelente)</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {% for criterio in item.criterios %}
+                        {% for criterio_info in item.criterios %}
                             <tr>
-                                <td class="border border-gray-300 p-2">{{ criterio.nombre }}</td>
-                                <td class="border border-gray-300 p-2">{{ criterio.descripcion }}</td>
+                                <td class="border border-gray-300 p-2">{{ criterio_info.criterio.nombre }}</td>
+                                <td class="border border-gray-300 p-2">{{ criterio_info.criterio.descripcion }}</td>
                                 <td class="border border-gray-300 p-2">
-                                    {% if criterio.puntaje_maximo == 1 %}
-                                        Muy Malo
-                                    {% elif criterio.puntaje_maximo == 2 %}
-                                        Malo
-                                    {% elif criterio.puntaje_maximo == 3 %}
-                                        Regular
-                                    {% elif criterio.puntaje_maximo == 4 %}
-                                        Bueno
-                                    {% elif criterio.puntaje_maximo == 5 %}
-                                        Excelente
+                                    {% if criterio_info.criterio.comentario %}
+                                        {{ criterio_info.criterio.comentario }}
+                                    {% else %}
+                                        <em>No hay comentario</em>
+                                    {% endif %}
+                                </td>
+                                <!-- Mostrar descripciones de los puntajes en las columnas correspondientes -->
+                                <td class="border border-gray-300 p-2">
+                                    {% if criterio_info.descripciones_puntajes.1 %}
+                                        {{ criterio_info.descripciones_puntajes.1.descripcion }}
+                                    {% else %}
+                                        <em>Sin descripción</em>
                                     {% endif %}
                                 </td>
                                 <td class="border border-gray-300 p-2">
-                                    {% if criterio.comentario %}
-                                        {{ criterio.comentario }}
+                                    {% if criterio_info.descripciones_puntajes.2 %}
+                                        {{ criterio_info.descripciones_puntajes.2.descripcion }}
                                     {% else %}
-                                        <em>No hay comentario</em>
+                                        <em>Sin descripción</em>
+                                    {% endif %}
+                                </td>
+                                <td class="border border-gray-300 p-2">
+                                    {% if criterio_info.descripciones_puntajes.3 %}
+                                        {{ criterio_info.descripciones_puntajes.3.descripcion }}
+                                    {% else %}
+                                        <em>Sin descripción</em>
+                                    {% endif %}
+                                </td>
+                                <td class="border border-gray-300 p-2">
+                                    {% if criterio_info.descripciones_puntajes.4 %}
+                                        {{ criterio_info.descripciones_puntajes.4.descripcion }}
+                                    {% else %}
+                                        <em>Sin descripción</em>
+                                    {% endif %}
+                                </td>
+                                <td class="border border-gray-300 p-2">
+                                    {% if criterio_info.descripciones_puntajes.5 %}
+                                        {{ criterio_info.descripciones_puntajes.5.descripcion }}
+                                    {% else %}
+                                        <em>Sin descripción</em>
                                     {% endif %}
                                 </td>
                             </tr>
                         {% empty %}
                             <tr>
-                                <td colspan="4" class="border border-gray-300 p-2 text-center">No hay criterios para esta categoría.</td>
+                                <td colspan="8" class="border border-gray-300 p-2 text-center">No hay criterios para esta categoría.</td>
                             </tr>
                         {% endfor %}
                     </tbody>
@@ -61,4 +88,7 @@
         {% endfor %}
     </div>
 </div>
+
+<a href="{% url 'editar_rubrica' rubrica.id %}" class="p-2 bg-yellow-500 text-white rounded-lg">Editar Rúbrica</a>
+
 {% endblock %}

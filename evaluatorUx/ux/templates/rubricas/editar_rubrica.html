@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mx-auto p-4">
+    <h2 class="text-2xl font-bold mb-4">Editar Rúbrica</h2>
+
+    <form method="POST" id="rubricaForm">
+        {% csrf_token %}
+        {{ rubrica_form.as_p }}
+
+        <h3 class="text-xl font-semibold mb-2">Categorías:</h3>
+
+        <div id="categorias">
+            {% for categoria in categorias %}
+                <div class="categoria-item mb-4 p-4 border rounded-lg">
+                    <h4 class="font-bold">{{ categoria.nombre }}</h4>
+                    <p>{{ categoria.descripcion }}</p>
+
+                    <h5 class="font-semibold mt-2">Criterios:</h5>
+                    <ul id="criterios-{{ categoria.id }}">
+                        {% for criterio in categoria.criterios.all %}
+                            <li>
+                                <input type="text" name="criterio_nombre_{{ criterio.id }}" value="{{ criterio.nombre }}" placeholder="Nombre del criterio">
+                                <input type="text" name="criterio_descripcion_{{ criterio.id }}" value="{{ criterio.descripcion }}" placeholder="Descripción del criterio">
+                                
+                                <h6 class="font-semibold mt-2">Descripciones de Puntajes:</h6>
+                                <ul>
+                                    {% for descripcion_puntaje in criterio.descripciones.all %}
+                                        <li>
+                                            <strong>Puntaje {{ descripcion_puntaje.puntaje }}:</strong>
+                                            <input type="text" name="descripcion_puntaje_{{ criterio.id }}_{{ descripcion_puntaje.puntaje }}" value="{{ descripcion_puntaje.descripcion }}" placeholder="Descripción del puntaje">
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                                
+                                <button type="button" class="btn-eliminar-criterio" data-criterio-id="{{ criterio.id }}">Eliminar</button>
+                            </li>
+                        {% endfor %}
+                    </ul>
+
+                    <button type="button" class="btn-agregar-criterio" data-categoria-id="{{ categoria.id }}">Agregar Criterio</button>
+                </div>
+            {% endfor %}
+        </div>
+
+        <button type="button" id="btn-agregar-categoria">Agregar Categoría</button>
+
+        <button type="submit" class="mt-4 p-2 bg-blue-500 text-white rounded-lg">Guardar cambios</button>
+    </form>
+</div>
+
+<script>
+// Lógica para agregar/quitar criterios y categorías dinámicamente
+document.addEventListener('DOMContentLoaded', function() {
+    // Función para agregar un nuevo criterio dinámicamente
+    document.querySelectorAll('.btn-agregar-criterio').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            const categoriaId = this.getAttribute('data-categoria-id');
+            const ul = document.getElementById(`criterios-${categoriaId}`);
+            const newCriterio = document.createElement('li');
+            newCriterio.innerHTML = `
+                <input type="text" name="nuevo_criterio_nombre_${categoriaId}[]" placeholder="Nombre del criterio">
+                <input type="text" name="nuevo_criterio_descripcion_${categoriaId}[]" placeholder="Descripción del criterio">
+                <h6 class="font-semibold mt-2">Descripciones de Puntajes:</h6>
+                <ul>
+                    <li>
+                        <strong>Puntaje 1:</strong>
+                        <input type="text" name="descripcion_puntaje_nuevo_${categoriaId}[]" placeholder="Descripción del puntaje">
+                    </li>
+                    <li>
+                        <strong>Puntaje 2:</strong>
+                        <input type="text" name="descripcion_puntaje_nuevo_${categoriaId}[]" placeholder="Descripción del puntaje">
+                    </li>
+                    <li>
+                        <strong>Puntaje 3:</strong>
+                        <input type="text" name="descripcion_puntaje_nuevo_${categoriaId}[]" placeholder="Descripción del puntaje">
+                    </li>
+                    <li>
+                        <strong>Puntaje 4:</strong>
+                        <input type="text" name="descripcion_puntaje_nuevo_${categoriaId}[]" placeholder="Descripción del puntaje">
+                    </li>
+                    <li>
+                        <strong>Puntaje 5:</strong>
+                        <input type="text" name="descripcion_puntaje_nuevo_${categoriaId}[]" placeholder="Descripción del puntaje">
+                    </li>
+                </ul>
+                <button type="button" class="btn-eliminar-criterio">Eliminar</button>
+            `;
+            ul.appendChild(newCriterio);
+        });
+    });
+
+    // Función para eliminar un criterio dinámicamente
+    document.querySelectorAll('.btn-eliminar-criterio').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            this.closest('li').remove();
+        });
+    });
+
+    // Función para agregar una nueva categoría
+    document.getElementById('btn-agregar-categoria').addEventListener('click', function() {
+        const categoriasDiv = document.getElementById('categorias');
+        const newCategoria = document.createElement('div');
+        newCategoria.classList.add('categoria-item', 'mb-4', 'p-4', 'border', 'rounded-lg');
+        newCategoria.innerHTML = `
+            <h4 class="font-bold">Nueva Categoría</h4>
+            <input type="text" name="nueva_categoria_nombre[]" placeholder="Nombre de la categoría">
+            <input type="text" name="nueva_categoria_descripcion[]" placeholder="Descripción de la categoría">
+            <h5 class="font-semibold mt-2">Criterios:</h5>
+            <ul></ul>
+            <button type="button" class="btn-agregar-criterio">Agregar Criterio</button>
+        `;
+        categoriasDiv.appendChild(newCategoria);
+    });
+});
+</script>
+
+{% endblock %}

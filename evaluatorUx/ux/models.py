@@ -28,6 +28,13 @@ class Criterio(models.Model):
 
     def __str__(self):
         return self.nombre
+    
+    # Nuevo método para obtener la descripción de un puntaje
+    def get_descripcion_puntaje(self, puntaje):
+        try:
+            return self.descripciones.get(puntaje=puntaje).descripcion
+        except DescripcionPuntaje.DoesNotExist:
+            return "Descripción no disponible para este puntaje"
 
 # Modelo DescripcionPuntaje (para almacenar descripciones de los puntajes 1-5)
 class DescripcionPuntaje(models.Model):

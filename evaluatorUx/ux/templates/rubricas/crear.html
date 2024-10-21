@@ -86,9 +86,29 @@
                 <label for="criterios-${categoriaId}-${criterioCount}-comentario" class="block font-medium mt-2">Comentario (Opcional):</label>
                 <textarea name="criterios-${categoriaId}-${criterioCount}-comentario" class="border border-gray-300 p-2 rounded w-full"></textarea><br>
 
+                <!-- Descripciones de puntajes -->
+                <div class="mt-4">
+                    <h4 class="text-lg font-semibold">Descripciones de Puntajes:</h4>
+                    <label for="criterios-${categoriaId}-${criterioCount}-puntaje-1" class="block">1 (Muy Deficiente):</label>
+                    <textarea name="criterios-${categoriaId}-${criterioCount}-puntaje-1" class="border border-gray-300 p-2 rounded w-full"></textarea>
+
+                    <label for="criterios-${categoriaId}-${criterioCount}-puntaje-2" class="block mt-2">2 (Deficiente):</label>
+                    <textarea name="criterios-${categoriaId}-${criterioCount}-puntaje-2" class="border border-gray-300 p-2 rounded w-full"></textarea>
+
+                    <label for="criterios-${categoriaId}-${criterioCount}-puntaje-3" class="block mt-2">3 (Aceptable):</label>
+                    <textarea name="criterios-${categoriaId}-${criterioCount}-puntaje-3" class="border border-gray-300 p-2 rounded w-full"></textarea>
+
+                    <label for="criterios-${categoriaId}-${criterioCount}-puntaje-4" class="block mt-2">4 (Buena):</label>
+                    <textarea name="criterios-${categoriaId}-${criterioCount}-puntaje-4" class="border border-gray-300 p-2 rounded w-full"></textarea>
+
+                    <label for="criterios-${categoriaId}-${criterioCount}-puntaje-5" class="block mt-2">5 (Excelente):</label>
+                    <textarea name="criterios-${categoriaId}-${criterioCount}-puntaje-5" class="border border-gray-300 p-2 rounded w-full"></textarea>
+                </div>
+
                 <button type="button" onclick="eliminarCriterio(${categoriaId}, ${criterioCount})" class="bg-red-500 text-white px-3 py-1 rounded mt-2">Eliminar Criterio</button>
             </div>
         `;
+
         criteriosDiv.insertAdjacentHTML('beforeend', nuevoCriterio);
     }
 
