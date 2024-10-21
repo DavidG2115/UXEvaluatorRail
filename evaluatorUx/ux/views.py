@@ -63,10 +63,6 @@ def crear_rubrica(request):
 
     return render(request, 'rubricas/crear.html')
 
-
-
-
-
 def seleccionar_rubrica(request):
     rubricas = Rubrica.objects.all()  # Mostrar todas las rúbricas
     
@@ -113,7 +109,6 @@ def ver_rubrica(request, rubrica_id):
     
     return render(request, 'rubricas/ver_rubrica.html', context)
 
-
 def editar_rubrica(request, rubrica_id):
     rubrica = get_object_or_404(Rubrica, id=rubrica_id)
     
@@ -126,6 +121,10 @@ def editar_rubrica(request, rubrica_id):
             categorias = Categoria.objects.filter(rubrica=rubrica)
 
             for categoria in categorias:
+                if request.POST.get(f'eliminar_categoria_{categoria.id}') == 'true':
+                    categoria.delete()
+                    continue
+
                 categoria_nombre = request.POST.get(f'categoria_nombre_{categoria.id}')
                 categoria_descripcion = request.POST.get(f'categoria_descripcion_{categoria.id}')
 
@@ -136,6 +135,10 @@ def editar_rubrica(request, rubrica_id):
 
                     # Guardar cambios de los criterios dentro de la categoría
                     for criterio in categoria.criterios.all():
+                        if request.POST.get(f'eliminar_criterio_{criterio.id}') == 'true':
+                            criterio.delete()
+                            continue
+
                         criterio_nombre = request.POST.get(f'criterio_nombre_{criterio.id}')
                         criterio_descripcion = request.POST.get(f'criterio_descripcion_{criterio.id}')
 
@@ -172,13 +175,32 @@ def editar_rubrica(request, rubrica_id):
 
                             # Crear descripciones de puntajes para el nuevo criterio
                             for puntaje in range(1, 6):
-                                descripcion_puntaje = request.POST.get(f'descripcion_puntaje_nuevo_{nueva_categoria.id}_{puntaje}')
+                                descripcion_puntaje = request.POST.get(f'descripcion_puntaje_nuevo_{nueva_categoria.id}_{puntaje}[]')
                                 if descripcion_puntaje:
                                     DescripcionPuntaje.objects.create(
                                         criterio=nuevo_criterio,
                                         puntaje=puntaje,
                                         descripcion=descripcion_puntaje
                                     )
+
+            # Crear nuevos criterios para las categorías existentes
+            for categoria in categorias:
+                nuevos_criterios_nombres = request.POST.getlist(f'nuevo_criterio_nombre_{categoria.id}[]')
+                nuevos_criterios_descripciones = request.POST.getlist(f'nuevo_criterio_descripcion_{categoria.id}[]')
+
+                for criterio_nombre, criterio_descripcion in zip(nuevos_criterios_nombres, nuevos_criterios_descripciones):
+                    if criterio_nombre:
+                        nuevo_criterio = Criterio.objects.create(categoria=categoria, nombre=criterio_nombre, descripcion=criterio_descripcion)
+
+                        # Crear descripciones de puntajes para el nuevo criterio
+                        for puntaje in range(1, 6):
+                            descripcion_puntaje = request.POST.get(f'descripcion_puntaje_nuevo_{categoria.id}_{puntaje}[]')
+                            if descripcion_puntaje:
+                                DescripcionPuntaje.objects.create(
+                                    criterio=nuevo_criterio,
+                                    puntaje=puntaje,
+                                    descripcion=descripcion_puntaje
+                                )
 
             return redirect('ver_rubrica', rubrica_id=rubrica.id)
 
@@ -197,4 +219,4 @@ def editar_rubrica(request, rubrica_id):
 def eliminar_rubrica(request, rubrica_id):
     rubrica = get_object_or_404(Rubrica, id=rubrica_id)
     rubrica.delete()
-    return redirect('seleccionar_rubrica') 
+    return redirect('seleccionar_rubrica')

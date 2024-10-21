@@ -2,42 +2,32 @@
 
 {% block content %}
 
-<h2 class="text-2xl font-bold mb-4">Seleccionar Rúbrica</h2>
-<ul class="space-y-4">
-    {% for rubrica in rubricas %}
-    <li>
-        <form method="POST" action="{% url 'ver_rubrica' rubrica.id %}">
-            {% csrf_token %}
-            <button type="submit" class="bg-blue-500 text-white font-bold py-2 px-4 rounded hover:bg-blue-700 w-full">
-                {{ rubrica.nombre }}
-            </button>
-        </form>
-    </li>
-    {% endfor %}
-</ul>
+<div class="container mx-auto p-4">
+    <h2 class="text-2xl font-bold mb-4">Seleccionar Rúbrica</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {% for rubrica in rubricas %}
+        <div class="bg-white border border-gray-300 rounded-lg shadow-md p-4 hover:shadow-lg transition-shadow duration-200">
+            <form method="POST" action="{% url 'ver_rubrica' rubrica.id %}">
+                {% csrf_token %}
+                <button type="submit" class="text-lg font-bold text-blue-500 w-full text-left">
+                    {{ rubrica.nombre }}
+                </button>
+                <p class="text-gray-700">{{ rubrica.descripcion }}</p>
+            </form>
+        </div>
+        {% empty %}
+        <div class="col-span-1">
+            <p>No hay rúbricas disponibles.</p>
+        </div>
+        {% endfor %}
+    </div>
 
-<!-- Botón para crear una nueva rúbrica -->
-<a href="{% url 'crear_rubrica' %}" class="bg-blue-500 text-white font-bold py-2 px-4 rounded hover:bg-blue-700">
-    Crear Nueva Rúbrica
-</a>
-
-
-{% if rubricas %}
-    <form method="POST">
-        {% csrf_token %}
-        <h3>Rúbricas Disponibles</h3>
-        <select name="rubrica_id" class="border rounded-md p-2">
-            <option value="">Seleccione una rúbrica</option>
-            {% for rubrica in rubricas %}
-                <option value="{{ rubrica.id }}">{{ rubrica.nombre }}</option>
-            {% endfor %}
-        </select>
-        <button type="submit" class="bg-green-500 text-white font-bold py-2 px-4 rounded hover:bg-green-700">
-            Editar Rúbrica
-        </button>
-    </form>
-{% else %}
-    <p>No hay rúbricas disponibles.</p>
-{% endif %}
+    <!-- Botón para crear una nueva rúbrica -->
+    <div class="mt-6">
+        <a href="{% url 'crear_rubrica' %}" class="bg-green-500 text-white font-bold py-2 px-4 rounded hover:bg-green-700 transition duration-200 ease-in-out w-full text-center">
+            Crear Nueva Rúbrica
+        </a>
+    </div>
+</div>
 
 {% endblock %}
