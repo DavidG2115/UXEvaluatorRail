@@ -69,10 +69,12 @@
                                 </td>
                                 <td class="border border-gray-300 p-2">
                                     <select name="criterio_{{ criterio_info.criterio.id }}" id="criterio_{{ criterio_info.criterio.id }}">
-                                        <option value="">Seleccione una calificación</option>
-                                        {% for i in "12345" %}
-                                            <option value="{{ i }}">{{ i }}</option>
-                                        {% endfor %}
+                                        <option selected>Seleccione una calificación</option>
+                                        <option value="1">Muy Deficiente</option>
+                                        <option value="2">Deficiente</option>
+                                        <option value="3">Aceptable</option>
+                                        <option value="4">Buena</option>
+                                        <option value="5">Excelente</option>
                                     </select>
                                 </td>
                                 <td class="border border-gray-300 p-2">

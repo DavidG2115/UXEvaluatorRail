@@ -6,6 +6,11 @@
     <form method="POST" class="space-y-6">
         {% csrf_token %}
         
+        <!-- Opción para cargar una rúbrica predefinida -->
+        {% if rubrica_predefinida %}
+            <button type="submit" name="cargar_predefinida" class="bg-blue-500 text-white px-3 py-1 rounded mt-2">Cargar Rúbrica Predefinida</button>
+        {% endif %}
+        
         <!-- Formulario para los detalles de la rúbrica -->
         <div>
             <label for="nombre_rubrica" class="block font-medium">Nombre de la Rúbrica:</label>
@@ -36,7 +41,7 @@
         // Función para agregar una nueva categoría
         document.getElementById('agregar_categoria').addEventListener('click', function() {
             categoriaCount++;  // Incrementar el número de categorías
-            document.getElementById('categorias_count').value = categoriaCount --;  // Actualizar el input oculto
+            document.getElementById('categorias_count').value = categoriaCount;  // Actualizar el input oculto
 
             let nuevaCategoria = `
                 <div class="bg-gray-100 p-4 rounded-lg border border-gray-300 mt-4" id="categoria-${categoriaCount}">

@@ -8,55 +8,90 @@ def index(request):
     return render(request, 'rubricas/index.html')
 
 def crear_rubrica(request):
+    rubrica_predefinida = Rubrica.objects.filter(predefinida=True).first()
+
     if request.method == "POST":
-        # Crear la rúbrica
-        nombre_rubrica = request.POST.get('nombre_rubrica')
-        descripcion_rubrica = request.POST.get('descripcion_rubrica')
+        if 'cargar_predefinida' in request.POST:
+            # Cargar la rúbrica predefinida
+            if rubrica_predefinida:
+                rubrica = Rubrica.objects.create(
+                    nombre=f'{rubrica_predefinida.nombre} (Copia)',
+                    descripcion=rubrica_predefinida.descripcion,
+                    usuario=request.user
+                )
 
-        rubrica = Rubrica.objects.create(nombre=nombre_rubrica, descripcion=descripcion_rubrica, usuario=request.user)
+                for categoria in rubrica_predefinida.categorias.all():
+                    nueva_categoria = Categoria.objects.create(
+                        rubrica=rubrica,
+                        nombre=categoria.nombre,
+                        descripcion=categoria.descripcion
+                    )
 
-        # Obtener el número de categorías
-        categorias_count = int(request.POST.get('categorias_count', 0))
-
-        # Iterar sobre las categorías dinámicas
-        for i in range(categorias_count):
-            nombre_categoria = request.POST.get(f'categorias-{i}-nombre')
-            descripcion_categoria = request.POST.get(f'categorias-{i}-descripcion')
-
-            if nombre_categoria:  # Asegurarse de que el nombre no esté vacío
-                categoria = Categoria.objects.create(rubrica=rubrica, nombre=nombre_categoria, descripcion=descripcion_categoria)
-
-                # Obtener el número de criterios para esta categoría
-                criterios_count = int(request.POST.get(f'criterios_count-{i}', 0))
-
-                # Iterar sobre los criterios dinámicos
-                for j in range(criterios_count):
-                    nombre_criterio = request.POST.get(f'criterios-{i}-{j}-nombre')
-                    descripcion_criterio = request.POST.get(f'criterios-{i}-{j}-descripcion')
-
-                    if nombre_criterio:  # Asegurarse de que el nombre del criterio no esté vacío
-                        criterio = Criterio.objects.create(
-                            categoria=categoria,
-                            nombre=nombre_criterio,
-                            descripcion=descripcion_criterio
+                    for criterio in categoria.criterios.all():
+                        nuevo_criterio = Criterio.objects.create(
+                            categoria=nueva_categoria,
+                            nombre=criterio.nombre,
+                            descripcion=criterio.descripcion
                         )
 
-                        # Crear las descripciones de los puntajes
-                        for puntaje in range(1, 6):  # Puntajes del 1 al 5
-                            descripcion_puntaje = request.POST.get(f'criterios-{i}-{j}-puntaje-{puntaje}')
-                            if descripcion_puntaje:
-                                DescripcionPuntaje.objects.create(
-                                    criterio=criterio,
-                                    puntaje=puntaje,
-                                    descripcion=descripcion_puntaje
-                                )
+                        for descripcion_puntaje in criterio.descripciones.all():
+                            DescripcionPuntaje.objects.create(
+                                criterio=nuevo_criterio,
+                                puntaje=descripcion_puntaje.puntaje,
+                                descripcion=descripcion_puntaje.descripcion
+                            )
 
-        return redirect('seleccionar_rubrica')  # Redirigir a una vista donde se liste las rúbricas
+                return redirect('editar_rubrica', rubrica_id=rubrica.id)
 
-    return render(request, 'rubricas/crear.html')
+        else:
+            # Crear una nueva rúbrica desde cero
+            nombre_rubrica = request.POST.get('nombre_rubrica')
+            descripcion_rubrica = request.POST.get('descripcion_rubrica')
+
+            rubrica = Rubrica.objects.create(nombre=nombre_rubrica, descripcion=descripcion_rubrica, usuario=request.user)
+
+            # Obtener el número de categorías
+            categorias_count = int(request.POST.get('categorias_count', 0))
+
+            # Iterar sobre las categorías dinámicas
+            for i in range(categorias_count):
+                nombre_categoria = request.POST.get(f'categorias-{i}-nombre')
+                descripcion_categoria = request.POST.get(f'categorias-{i}-descripcion')
+
+                if nombre_categoria:  # Asegurarse de que el nombre no esté vacío
+                    categoria = Categoria.objects.create(rubrica=rubrica, nombre=nombre_categoria, descripcion=descripcion_categoria)
+
+                    # Obtener el número de criterios para esta categoría
+                    criterios_count = int(request.POST.get(f'criterios_count-{i}', 0))
+
+                    # Iterar sobre los criterios dinámicos
+                    for j in range(criterios_count):
+                        nombre_criterio = request.POST.get(f'criterios-{i}-{j}-nombre')
+                        descripcion_criterio = request.POST.get(f'criterios-{i}-{j}-descripcion')
+
+                        if nombre_criterio:  # Asegurarse de que el nombre del criterio no esté vacío
+                            criterio = Criterio.objects.create(
+                                categoria=categoria,
+                                nombre=nombre_criterio,
+                                descripcion=descripcion_criterio
+                            )
+
+                            # Crear las descripciones de los puntajes
+                            for puntaje in range(1, 6):  # Puntajes del 1 al 5
+                                descripcion_puntaje = request.POST.get(f'criterios-{i}-{j}-puntaje-{puntaje}')
+                                if descripcion_puntaje:
+                                    DescripcionPuntaje.objects.create(
+                                        criterio=criterio,
+                                        puntaje=puntaje,
+                                        descripcion=descripcion_puntaje
+                                    )
+
+            return redirect('seleccionar_rubrica')  # Redirigir a una vista donde se liste las rúbricas
+
+    return render(request, 'rubricas/crear.html', {'rubrica_predefinida': rubrica_predefinida})
 
 def seleccionar_rubrica(request):
-    rubricas = Rubrica.objects.all()  # Mostrar todas las rúbricas
+    rubricas = Rubrica.objects.filter(usuario=request.user)
     
     if request.method == 'POST':
         rubrica_id = request.POST.get('rubrica_id')

@@ -7,6 +7,7 @@ class Rubrica(models.Model):
     nombre = models.CharField(max_length=100)
     descripcion = models.TextField(blank=True)
     usuario = models.ForeignKey(User, on_delete=models.CASCADE, related_name='rubricas')
+    predefinida = models.BooleanField(default=False)
 
     def __str__(self):
         return self.nombre
