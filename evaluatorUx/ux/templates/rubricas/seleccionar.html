@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h2 class="text-2xl font-bold mb-4">Seleccionar Rúbrica</h2>
+<ul class="space-y-4">
+    {% for rubrica in rubricas %}
+    <li>
+        <form method="POST" action="{% url 'ver_rubrica' rubrica.id %}">
+            {% csrf_token %}
+            <button type="submit" class="bg-blue-500 text-white font-bold py-2 px-4 rounded hover:bg-blue-700 w-full">
+                {{ rubrica.nombre }}
+            </button>
+        </form>
+    </li>
+    {% endfor %}
+</ul>
+
+<!-- Botón para crear una nueva rúbrica -->
+<a href="{% url 'crear_rubrica' %}" class="bg-blue-500 text-white font-bold py-2 px-4 rounded hover:bg-blue-700">
+    Crear Nueva Rúbrica
+</a>
+
+
+{% if rubricas %}
+    <form method="POST">
+        {% csrf_token %}
+        <h3>Rúbricas Disponibles</h3>
+        <select name="rubrica_id" class="border rounded-md p-2">
+            <option value="">Seleccione una rúbrica</option>
+            {% for rubrica in rubricas %}
+                <option value="{{ rubrica.id }}">{{ rubrica.nombre }}</option>
+            {% endfor %}
+        </select>
+        <button type="submit" class="bg-green-500 text-white font-bold py-2 px-4 rounded hover:bg-green-700">
+            Editar Rúbrica
+        </button>
+    </form>
+{% else %}
+    <p>No hay rúbricas disponibles.</p>
+{% endif %}
+
+{% endblock %}

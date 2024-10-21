@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mx-auto p-4">
+    <h2 class="text-2xl font-bold mb-4">Rúbrica: {{ rubrica.nombre }}</h2>
+    <p class="mb-4">{{ rubrica.descripcion }}</p>
+
+    <h3 class="text-xl font-semibold mb-2">Categorías:</h3>
+    <div class="space-y-4">
+        {% for item in categorias_con_criterios %}
+            <div class="bg-gray-100 p-4 rounded-lg border border-gray-300">
+                <h4 class="font-bold">{{ item.categoria.nombre }}</h4>
+                <p>{{ item.categoria.descripcion }}</p>
+
+                <h5 class="font-semibold mt-2">Criterios:</h5>
+                <table class="min-w-full border-collapse border border-gray-300 mt-2">
+                    <thead>
+                        <tr class="bg-gray-200">
+                            <th class="border border-gray-300 p-2">Nombre del Criterio</th>
+                            <th class="border border-gray-300 p-2">Descripción</th>
+                            <th class="border border-gray-300 p-2">Puntaje</th>
+                            <th class="border border-gray-300 p-2">Comentario</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for criterio in item.criterios %}
+                            <tr>
+                                <td class="border border-gray-300 p-2">{{ criterio.nombre }}</td>
+                                <td class="border border-gray-300 p-2">{{ criterio.descripcion }}</td>
+                                <td class="border border-gray-300 p-2">
+                                    {% if criterio.puntaje_maximo == 1 %}
+                                        Muy Malo
+                                    {% elif criterio.puntaje_maximo == 2 %}
+                                        Malo
+                                    {% elif criterio.puntaje_maximo == 3 %}
+                                        Regular
+                                    {% elif criterio.puntaje_maximo == 4 %}
+                                        Bueno
+                                    {% elif criterio.puntaje_maximo == 5 %}
+                                        Excelente
+                                    {% endif %}
+                                </td>
+                                <td class="border border-gray-300 p-2">
+                                    {% if criterio.comentario %}
+                                        {{ criterio.comentario }}
+                                    {% else %}
+                                        <em>No hay comentario</em>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="4" class="border border-gray-300 p-2 text-center">No hay criterios para esta categoría.</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% empty %}
+            <p>No hay categorías en esta rúbrica.</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

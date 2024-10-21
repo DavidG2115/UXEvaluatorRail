@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mx-auto p-4">
+    <h2 class="text-2xl font-bold mb-4">Crear Rúbrica</h2>
+    <form method="POST" class="space-y-6">
+        {% csrf_token %}
+        
+        <!-- Formulario para los detalles de la rúbrica -->
+        <div>
+            <label for="nombre_rubrica" class="block font-medium">Nombre de la Rúbrica:</label>
+            <input type="text" name="nombre_rubrica" required class="border border-gray-300 p-2 rounded w-full">
+            
+            <label for="descripcion_rubrica" class="block font-medium mt-2">Descripción de la Rúbrica:</label>
+            <textarea name="descripcion_rubrica" class="border border-gray-300 p-2 rounded w-full"></textarea>
+        </div>
+        
+        <!-- Sección donde se agregarán dinámicamente las categorías -->
+        <div id="categorias">
+            <!-- Aquí se agregarán dinámicamente las categorías y criterios -->
+        </div>
+
+        <!-- Input oculto para mantener el conteo de las categorías -->
+        <input type="hidden" id="categorias_count" name="categorias_count" value="0">
+
+        <!-- Botones para agregar categorías y guardar la rúbrica -->
+        <button type="button" id="agregar_categoria" class="bg-blue-500 text-white px-3 py-1 rounded mt-2">Agregar Categoría</button>
+        <button type="submit" class="bg-green-500 text-white px-3 py-1 rounded mt-2">Guardar Rúbrica</button>
+    </form>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        let categoriaCount = 0;
+
+        // Función para agregar una nueva categoría
+        document.getElementById('agregar_categoria').addEventListener('click', function() {
+            categoriaCount++;  // Incrementar el número de categorías
+            document.getElementById('categorias_count').value = categoriaCount --;  // Actualizar el input oculto
+
+            let nuevaCategoria = `
+                <div class="bg-gray-100 p-4 rounded-lg border border-gray-300 mt-4" id="categoria-${categoriaCount}">
+                    <h3 class="text-xl font-semibold">Categoría ${categoriaCount}</h3>
+                    
+                    <label for="categorias-${categoriaCount}-nombre" class="block font-medium">Nombre de la Categoría:</label>
+                    <input type="text" name="categorias-${categoriaCount}-nombre" required class="border border-gray-300 p-2 rounded w-full">
+                    
+                    <label for="categorias-${categoriaCount}-descripcion" class="block font-medium mt-2">Descripción:</label>
+                    <textarea name="categorias-${categoriaCount}-descripcion" class="border border-gray-300 p-2 rounded w-full"></textarea><br>
+
+                    <!-- Sección donde se agregarán dinámicamente los criterios para esta categoría -->
+                    <div id="criterios-${categoriaCount}">
+                        <!-- Aquí se agregarán los criterios dinámicamente -->
+                    </div>
+
+                    <!-- Input oculto para mantener el conteo de los criterios de esta categoría -->
+                    <input type="hidden" id="criterios_count-${categoriaCount}" name="criterios_count-${categoriaCount}" value="0">
+
+                    <!-- Botón para agregar un nuevo criterio -->
+                    <button type="button" onclick="agregarCriterio(${categoriaCount})" class="bg-blue-500 text-white px-3 py-1 rounded mt-2">Agregar Criterio</button>
+
+                    <!-- Botón para eliminar la categoría -->
+                    <button type="button" onclick="eliminarCategoria(${categoriaCount})" class="bg-red-500 text-white px-3 py-1 rounded mt-2">Eliminar Categoría</button>
+                </div>
+            `;
+            document.getElementById('categorias').insertAdjacentHTML('beforeend', nuevaCategoria);
+        });
+    });
+
+    // Función para agregar criterios dinámicamente
+    function agregarCriterio(categoriaId) {
+        const criteriosDiv = document.getElementById(`criterios-${categoriaId}`);
+        const criterioCount = criteriosDiv.children.length;
+
+        // Actualizar el input oculto que cuenta los criterios de la categoría
+        document.getElementById(`criterios_count-${categoriaId}`).value = criterioCount + 1;
+
+        let nuevoCriterio = `
+            <div class="bg-blue-100 p-4 rounded-lg border border-blue-300 mt-4" id="criterio-${categoriaId}-${criterioCount}">
+                <label for="criterios-${categoriaId}-${criterioCount}-nombre" class="block font-medium">Nombre del Criterio:</label>
+                <input type="text" name="criterios-${categoriaId}-${criterioCount}-nombre" required class="border border-gray-300 p-2 rounded w-full">
+
+                <label for="criterios-${categoriaId}-${criterioCount}-descripcion" class="block font-medium mt-2">Descripción:</label>
+                <textarea name="criterios-${categoriaId}-${criterioCount}-descripcion" class="border border-gray-300 p-2 rounded w-full"></textarea><br>
+
+                <label for="criterios-${categoriaId}-${criterioCount}-comentario" class="block font-medium mt-2">Comentario (Opcional):</label>
+                <textarea name="criterios-${categoriaId}-${criterioCount}-comentario" class="border border-gray-300 p-2 rounded w-full"></textarea><br>
+
+                <button type="button" onclick="eliminarCriterio(${categoriaId}, ${criterioCount})" class="bg-red-500 text-white px-3 py-1 rounded mt-2">Eliminar Criterio</button>
+            </div>
+        `;
+        criteriosDiv.insertAdjacentHTML('beforeend', nuevoCriterio);
+    }
+
+    // Función para eliminar una categoría
+    function eliminarCategoria(categoriaId) {
+        const categoriaDiv = document.getElementById(`categoria-${categoriaId}`);
+        if (categoriaDiv) {
+            categoriaDiv.remove();
+
+            // Actualizar el conteo de categorías
+            let categoriasCount = document.getElementById('categorias_count');
+            categoriasCount.value = parseInt(categoriasCount.value) - 1;
+        }
+    }
+
+    // Función para eliminar un criterio dentro de una categoría
+    function eliminarCriterio(categoriaId, criterioId) {
+        const criterioDiv = document.getElementById(`criterio-${categoriaId}-${criterioId}`);
+        if (criterioDiv) {
+            criterioDiv.remove();
+
+            // Actualizar el conteo de criterios de esa categoría
+            let criteriosCount = document.getElementById(`criterios_count-${categoriaId}`);
+            criteriosCount.value = parseInt(criteriosCount.value) - 1;
+        }
+    }
+</script>
+{% endblock %}

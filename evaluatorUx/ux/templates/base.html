@@ -1,0 +1,53 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Django + Tailwind CSS + Flowbite</title>
+     <!-- Font Awesome -->
+     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    
+     <!-- Google Fonts -->
+     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Open+Sans:wght@400;700&display=swap" rel="stylesheet">
+     
+    
+     <script src="https://cdn.tailwindcss.com"></script>
+   
+
+</head>
+
+{% comment %} {% if user.is_authenticated %} {% endcomment %}
+<nav class="navbar navbar-expand-lg navbar-light bg-dark" data-bs-theme="dark">
+  <div class="container-fluid">
+    <!-- Enlace a la izquierda para redirigir al inicio -->
+    <a class="navbar-brand" href="{% url 'index' %}">UX Evaluator</a>
+
+    <!-- Botón de colapso para pantallas pequeñas -->
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <!-- Contenido de la navbar -->
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav ms-auto"> <!-- Alínea los elementos a la derecha -->
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Perfil
+          </a>
+          <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+            {% comment %} <li><a class="dropdown-item" href="{% url 'profile' %}">Ver Perfil</a></li> {% endcomment %}
+            {% comment %} <li><a class="dropdown-item" href="{% url 'logout_view' %}">Cerrar sesión</a></li> {% endcomment %}
+          </ul>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+{% comment %} {% endif %} {% endcomment %}
+<body>
+    {% block content %}{% endblock %}
+</body>
+</html>
