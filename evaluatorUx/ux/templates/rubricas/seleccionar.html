@@ -3,28 +3,28 @@
 {% block content %}
 
 <div class="container mx-auto p-4">
-    <h2 class="text-2xl font-bold mb-4">Seleccionar Rúbrica</h2>
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+    <h2 class="text-center text-3xl font-bold mb-8 text-gray-800 dark:text-white">Seleccionar Rúbrica</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {% for rubrica in rubricas %}
-        <div class="bg-white border border-gray-300 rounded-lg shadow-md p-4 hover:shadow-lg transition-shadow duration-200">
+        <div class="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow duration-200">
             <form method="POST" action="{% url 'ver_rubrica' rubrica.id %}">
                 {% csrf_token %}
-                <button type="submit" class="text-lg font-bold text-blue-500 w-full text-left">
+                <button type="submit" class="text-lg font-bold text-blue-500 dark:text-blue-400 w-full text-left mb-2">
                     {{ rubrica.nombre }}
                 </button>
-                <p class="text-gray-700">{{ rubrica.descripcion }}</p>
+                <p class="text-gray-700 dark:text-gray-300">{{ rubrica.descripcion }}</p>
             </form>
         </div>
         {% empty %}
-        <div class="col-span-1">
-            <p>No hay rúbricas disponibles.</p>
+        <div class="col-span-1 text-center">
+            <p class="text-gray-700 dark:text-gray-300">No hay rúbricas disponibles.</p>
         </div>
         {% endfor %}
     </div>
 
     <!-- Botón para crear una nueva rúbrica -->
-    <div class="mt-6">
-        <a href="{% url 'crear_rubrica' %}" class="bg-green-500 text-white font-bold py-2 px-4 rounded hover:bg-green-700 transition duration-200 ease-in-out w-full text-center">
+    <div class="mt-8 flex justify-center">
+        <a href="{% url 'crear_rubrica' %}" class="bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-lg shadow-lg transition duration-300 transform hover:scale-105">
             Crear Nueva Rúbrica
         </a>
     </div>

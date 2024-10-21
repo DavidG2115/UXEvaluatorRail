@@ -11,9 +11,13 @@ from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph
 from django.http import HttpResponse
 from reportlab.lib import colors
 
-# Create your views here.
 def index(request):
-    return render(request, 'rubricas/index.html')
+    evaluaciones = EvaluacionGeneral.objects.filter(usuario=request.user)
+
+    context = {
+        'evaluaciones': evaluaciones,
+    }
+    return render(request, 'rubricas/index.html', context)
 
 def crear_rubrica(request):
     rubrica_predefinida = Rubrica.objects.filter(predefinida=True).first()
