@@ -1,17 +1,11 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages  # Import the messages module
-from .forms import RubricaForm, CategoriaFormSet, CriterioFormSet
-from .models import Criterio, Categoria, Rubrica, DescripcionPuntaje  # Import the Rubrica and Categoria models
+from .forms import RubricaForm, EvaluacionGeneralForm, CalificacionForm  # Import the RubricaForm
+from .models import Criterio, Categoria, Rubrica, DescripcionPuntaje, Calificacion, EvaluacionGeneral  # Import the Rubrica and Categoria models
 
 # Create your views here.
 def index(request):
     return render(request, 'rubricas/index.html')
-
-from django.shortcuts import render, redirect
-from django.contrib.auth.decorators import login_required
-from django.forms import modelform_factory
-from .models import Rubrica, Categoria, Criterio
-
 
 def crear_rubrica(request):
     if request.method == "POST":
@@ -39,14 +33,12 @@ def crear_rubrica(request):
                 for j in range(criterios_count):
                     nombre_criterio = request.POST.get(f'criterios-{i}-{j}-nombre')
                     descripcion_criterio = request.POST.get(f'criterios-{i}-{j}-descripcion')
-                    comentario_criterio = request.POST.get(f'criterios-{i}-{j}-comentario')
 
                     if nombre_criterio:  # Asegurarse de que el nombre del criterio no esté vacío
                         criterio = Criterio.objects.create(
                             categoria=categoria,
                             nombre=nombre_criterio,
-                            descripcion=descripcion_criterio,
-                            comentario=comentario_criterio
+                            descripcion=descripcion_criterio
                         )
 
                         # Crear las descripciones de los puntajes
@@ -220,3 +212,74 @@ def eliminar_rubrica(request, rubrica_id):
     rubrica = get_object_or_404(Rubrica, id=rubrica_id)
     rubrica.delete()
     return redirect('seleccionar_rubrica')
+
+
+
+# views.py
+def realizar_evaluacion(request, rubrica_id):
+    rubrica = get_object_or_404(Rubrica, id=rubrica_id)
+    categorias = Categoria.objects.filter(rubrica=rubrica).prefetch_related('criterios__descripciones')
+
+    if request.method == 'POST':
+        evaluacion_general_form = EvaluacionGeneralForm(request.POST)
+        if evaluacion_general_form.is_valid():
+            evaluacion_general = evaluacion_general_form.save(commit=False)
+            evaluacion_general.rubrica = rubrica
+            evaluacion_general.usuario = request.user
+            evaluacion_general.save()
+
+            for categoria in categorias:
+                for criterio in categoria.criterios.all():
+                    puntaje = request.POST.get(f'criterio_{criterio.id}')
+                    comentario = request.POST.get(f'comentario_{criterio.id}', '')  # Obtener el comentario
+                    if puntaje:
+                        Calificacion.objects.create(
+                            evaluacion_general=evaluacion_general,
+                            criterio=criterio,
+                            puntaje=puntaje,
+                            comentario=comentario  # Guardar el comentario
+                        )
+
+            return redirect('ver_evaluacion', evaluacion_id=evaluacion_general.id)
+
+    else:
+        evaluacion_general_form = EvaluacionGeneralForm()
+
+    # Preparar descripciones de puntajes
+    categorias_con_criterios = []
+    for categoria in categorias:
+        criterios_con_descripciones = []
+        for criterio in categoria.criterios.all():
+            descripciones_puntajes = {
+                1: criterio.descripciones.filter(puntaje=1).first(),
+                2: criterio.descripciones.filter(puntaje=2).first(),
+                3: criterio.descripciones.filter(puntaje=3).first(),
+                4: criterio.descripciones.filter(puntaje=4).first(),
+                5: criterio.descripciones.filter(puntaje=5).first(),
+            }
+            criterios_con_descripciones.append({
+                'criterio': criterio,
+                'descripciones_puntajes': descripciones_puntajes,
+            })
+        categorias_con_criterios.append({
+            'categoria': categoria,
+            'criterios': criterios_con_descripciones,
+        })
+
+    context = {
+        'rubrica': rubrica,
+        'categorias': categorias_con_criterios,
+        'evaluacion_general_form': evaluacion_general_form,
+    }
+    return render(request, 'rubricas/realizar_evaluacion.html', context)
+
+
+def ver_evaluacion(request, evaluacion_id):
+    evaluacion_general = get_object_or_404(EvaluacionGeneral, id=evaluacion_id)
+    calificaciones = Calificacion.objects.filter(evaluacion_general=evaluacion_general).select_related('criterio')
+
+    context = {
+        'evaluacion_general': evaluacion_general,
+        'calificaciones': calificaciones,
+    }
+    return render(request, 'rubricas/ver_evaluacion.html', context)

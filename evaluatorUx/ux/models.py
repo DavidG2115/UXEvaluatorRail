@@ -1,3 +1,4 @@
+# models.py
 from django.db import models
 from django.contrib.auth.models import User
 
@@ -24,7 +25,6 @@ class Criterio(models.Model):
     categoria = models.ForeignKey(Categoria, related_name='criterios', on_delete=models.CASCADE)
     nombre = models.CharField(max_length=100)
     descripcion = models.TextField()
-    comentario = models.TextField(blank=True, null=True)
 
     def __str__(self):
         return self.nombre
@@ -45,14 +45,22 @@ class DescripcionPuntaje(models.Model):
     def __str__(self):
         return f"{self.criterio.nombre} - {self.get_puntaje_display()}"
 
-# Modelo Evaluacion
-class Evaluacion(models.Model):
-    rubrica = models.ForeignKey(Rubrica, related_name='evaluaciones', on_delete=models.CASCADE)
-    categoria = models.ForeignKey(Categoria, on_delete=models.CASCADE)
+# Modelo EvaluacionGeneral (para almacenar la evaluación general)
+class EvaluacionGeneral(models.Model):
+    rubrica = models.ForeignKey(Rubrica, related_name='evaluaciones_generales', on_delete=models.CASCADE)
+    nombre_software = models.CharField(max_length=255)
+    fecha = models.DateTimeField(auto_now_add=True)
+    usuario = models.ForeignKey(User, on_delete=models.CASCADE, related_name='evaluaciones_generales')
+
+    def __str__(self):
+        return f"Evaluación de {self.nombre_software} - {self.rubrica.nombre}"
+
+# Modelo Calificacion (para almacenar las calificaciones de los criterios)
+class Calificacion(models.Model):
+    evaluacion_general = models.ForeignKey(EvaluacionGeneral, related_name='calificaciones', on_delete=models.CASCADE)
     criterio = models.ForeignKey(Criterio, on_delete=models.CASCADE)
     puntaje = models.IntegerField(choices=[(1, 'Muy Deficiente'), (2, 'Deficiente'), (3, 'Aceptable'), (4, 'Buena'), (5, 'Excelente')])
     comentario = models.TextField(blank=True, null=True)
-    usuario = models.ForeignKey(User, on_delete=models.CASCADE, related_name='evaluaciones')
-
+    
     def __str__(self):
-        return f"Evaluación - {self.rubrica.nombre} - {self.categoria.nombre} - {self.criterio.nombre}"
+        return f"{self.criterio.nombre} - {self.puntaje}"
