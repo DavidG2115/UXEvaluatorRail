@@ -45,5 +45,14 @@
             <p>No hay categorías en esta rúbrica.</p>
         {% endfor %}
     </div>
+
+    <!-- Botón para descargar el PDF -->
+    <div class="mt-6">
+        <a href="{% url 'generar_pdf' evaluacion_general.id %}" class="bg-blue-500 text-white font-bold py-2 px-4 rounded hover:bg-blue-700 transition duration-200 ease-in-out w-full text-center">
+            Descargar PDF
+        </a>
+    </div>
+    
 </div>
+
 {% endblock %}

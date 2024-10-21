@@ -1,6 +1,6 @@
 # admin.py
 from django.contrib import admin
-from .models import Rubrica, Categoria, Criterio, DescripcionPuntaje
+from .models import Rubrica, Categoria, Criterio, DescripcionPuntaje, EvaluacionGeneral
 
 class DescripcionPuntajeInline(admin.TabularInline):
     model = DescripcionPuntaje
@@ -25,3 +25,4 @@ admin.site.register(Rubrica, RubricaAdmin)
 admin.site.register(Categoria)
 admin.site.register(Criterio)
 admin.site.register(DescripcionPuntaje)
+admin.site.register(EvaluacionGeneral)

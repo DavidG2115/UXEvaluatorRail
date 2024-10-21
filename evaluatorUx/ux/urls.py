@@ -10,5 +10,6 @@ urlpatterns = [
     path('eliminar/<int:rubrica_id>/', eliminar_rubrica, name='eliminar_rubrica'),
     path('rubrica/<int:rubrica_id>/evaluar/', realizar_evaluacion, name='realizar_evaluacion'),
     path('evaluacion/<int:evaluacion_id>/', ver_evaluacion, name='ver_evaluacion'),
-    # path('evaluacion/<int:evaluacion_id>/pdf/', views.generar_pdf, name='generar_pdf'),
+    path('evaluacion/<int:evaluacion_id>/pdf/', generar_pdf, name='generar_pdf'),
+    path('generar_pdf_con_grafico/<int:evaluacion_id>/', generar_pdf_con_grafico, name='generar_pdf_con_grafico'),
 ]
