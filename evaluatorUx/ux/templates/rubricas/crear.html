@@ -1,141 +1,161 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="container mx-auto p-4">
-    <h2 class="text-2xl font-bold mb-4">Crear Rúbrica</h2>
-    <form method="POST" class="space-y-6">
+<div class="container mx-auto p-4 dark:bg-gray-800 dark:text-gray-100">
+    <h2 class="text-2xl font-bold mb-4 text-gray-800 dark:text-white">Crear Rúbrica</h2>
+    <form method="POST" id="rubricaForm">
         {% csrf_token %}
         
-        <!-- Opción para cargar una rúbrica predefinida -->
+        <!-- Botón para cargar una rúbrica predefinida -->
         {% if rubrica_predefinida %}
-            <button type="submit" name="cargar_predefinida" class="bg-blue-500 text-white px-3 py-1 rounded mt-2">Cargar Rúbrica Predefinida</button>
+            <button type="submit" name="cargar_predefinida" class="bg-blue-500 text-white px-4 py-2 rounded mt-2 hover:bg-blue-600 transition duration-200 ease-in-out">
+                Cargar Rúbrica Predefinida
+            </button>
         {% endif %}
         
         <!-- Formulario para los detalles de la rúbrica -->
-        <div>
-            <label for="nombre_rubrica" class="block font-medium">Nombre de la Rúbrica:</label>
-            <input type="text" name="nombre_rubrica" required class="border border-gray-300 p-2 rounded w-full">
+        <div class="bg-gray-100 p-4 rounded-lg border border-gray-300 dark:bg-gray-700 dark:border-gray-600 mb-6">
+            <label for="nombre_rubrica" class="block font-medium text-gray-800 dark:text-white">Nombre de la Rúbrica:</label>
+            <input type="text" name="nombre_rubrica" required class="border border-gray-300 p-2 rounded w-full dark:bg-gray-600 dark:text-white mb-4">
             
-            <label for="descripcion_rubrica" class="block font-medium mt-2">Descripción de la Rúbrica:</label>
-            <textarea name="descripcion_rubrica" class="border border-gray-300 p-2 rounded w-full"></textarea>
+            <label for="descripcion_rubrica" class="block font-medium text-gray-800 dark:text-white">Descripción de la Rúbrica:</label>
+            <textarea name="descripcion_rubrica" class="border border-gray-300 p-2 rounded w-full dark:bg-gray-600 dark:text-white"></textarea>
         </div>
         
-        <!-- Sección donde se agregarán dinámicamente las categorías -->
+        <h3 class="text-xl font-semibold mb-2 text-gray-800 dark:text-white">Categorías:</h3>
+
         <div id="categorias">
             <!-- Aquí se agregarán dinámicamente las categorías y criterios -->
         </div>
 
-        <!-- Input oculto para mantener el conteo de las categorías -->
-        <input type="hidden" id="categorias_count" name="categorias_count" value="0">
+        <button type="button" id="btn-agregar-categoria" class="mt-4 p-2 bg-green-500 text-white rounded-lg hover:bg-green-600">Agregar Categoría</button>
 
-        <!-- Botones para agregar categorías y guardar la rúbrica -->
-        <button type="button" id="agregar_categoria" class="bg-blue-500 text-white px-3 py-1 rounded mt-2">Agregar Categoría</button>
-        <button type="submit" class="bg-green-500 text-white px-3 py-1 rounded mt-2">Guardar Rúbrica</button>
+        <div class="flex justify-between mt-6">
+            <button type="button" id="btn-guardar-cambios" class="p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">Guardar Rúbrica</button>
+            <button type="button" onclick="window.location.href = '{% url 'seleccionar_rubrica' %}'" class="p-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600">Cancelar</button>
+        </div>
     </form>
 </div>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        let categoriaCount = 0;
+document.addEventListener('DOMContentLoaded', function() {
+    let categoriaCount = 0;
 
-        // Función para agregar una nueva categoría
-        document.getElementById('agregar_categoria').addEventListener('click', function() {
-            categoriaCount++;  // Incrementar el número de categorías
-            document.getElementById('categorias_count').value = categoriaCount;  // Actualizar el input oculto
-
-            let nuevaCategoria = `
-                <div class="bg-gray-100 p-4 rounded-lg border border-gray-300 mt-4" id="categoria-${categoriaCount}">
-                    <h3 class="text-xl font-semibold">Categoría ${categoriaCount}</h3>
-                    
-                    <label for="categorias-${categoriaCount}-nombre" class="block font-medium">Nombre de la Categoría:</label>
-                    <input type="text" name="categorias-${categoriaCount}-nombre" required class="border border-gray-300 p-2 rounded w-full">
-                    
-                    <label for="categorias-${categoriaCount}-descripcion" class="block font-medium mt-2">Descripción:</label>
-                    <textarea name="categorias-${categoriaCount}-descripcion" class="border border-gray-300 p-2 rounded w-full"></textarea><br>
-
-                    <!-- Sección donde se agregarán dinámicamente los criterios para esta categoría -->
-                    <div id="criterios-${categoriaCount}">
-                        <!-- Aquí se agregarán los criterios dinámicamente -->
-                    </div>
-
-                    <!-- Input oculto para mantener el conteo de los criterios de esta categoría -->
-                    <input type="hidden" id="criterios_count-${categoriaCount}" name="criterios_count-${categoriaCount}" value="0">
-
-                    <!-- Botón para agregar un nuevo criterio -->
-                    <button type="button" onclick="agregarCriterio(${categoriaCount})" class="bg-blue-500 text-white px-3 py-1 rounded mt-2">Agregar Criterio</button>
-
-                    <!-- Botón para eliminar la categoría -->
-                    <button type="button" onclick="eliminarCategoria(${categoriaCount})" class="bg-red-500 text-white px-3 py-1 rounded mt-2">Eliminar Categoría</button>
-                </div>
-            `;
-            document.getElementById('categorias').insertAdjacentHTML('beforeend', nuevaCategoria);
-        });
-    });
-
-    // Función para agregar criterios dinámicamente
-    function agregarCriterio(categoriaId) {
-        const criteriosDiv = document.getElementById(`criterios-${categoriaId}`);
-        const criterioCount = criteriosDiv.children.length;
-
-        // Actualizar el input oculto que cuenta los criterios de la categoría
-        document.getElementById(`criterios_count-${categoriaId}`).value = criterioCount + 1;
-
-        let nuevoCriterio = `
-            <div class="bg-blue-100 p-4 rounded-lg border border-blue-300 mt-4" id="criterio-${categoriaId}-${criterioCount}">
-                <label for="criterios-${categoriaId}-${criterioCount}-nombre" class="block font-medium">Nombre del Criterio:</label>
-                <input type="text" name="criterios-${categoriaId}-${criterioCount}-nombre" required class="border border-gray-300 p-2 rounded w-full">
-
-                <label for="criterios-${categoriaId}-${criterioCount}-descripcion" class="block font-medium mt-2">Descripción:</label>
-                <textarea name="criterios-${categoriaId}-${criterioCount}-descripcion" class="border border-gray-300 p-2 rounded w-full"></textarea><br>
-
-                <!-- Descripciones de puntajes -->
-                <div class="mt-4">
-                    <h4 class="text-lg font-semibold">Descripciones de Puntajes:</h4>
-                    <label for="criterios-${categoriaId}-${criterioCount}-puntaje-1" class="block">1 (Muy Deficiente):</label>
-                    <textarea name="criterios-${categoriaId}-${criterioCount}-puntaje-1" class="border border-gray-300 p-2 rounded w-full"></textarea>
-
-                    <label for="criterios-${categoriaId}-${criterioCount}-puntaje-2" class="block mt-2">2 (Deficiente):</label>
-                    <textarea name="criterios-${categoriaId}-${criterioCount}-puntaje-2" class="border border-gray-300 p-2 rounded w-full"></textarea>
-
-                    <label for="criterios-${categoriaId}-${criterioCount}-puntaje-3" class="block mt-2">3 (Aceptable):</label>
-                    <textarea name="criterios-${categoriaId}-${criterioCount}-puntaje-3" class="border border-gray-300 p-2 rounded w-full"></textarea>
-
-                    <label for="criterios-${categoriaId}-${criterioCount}-puntaje-4" class="block mt-2">4 (Buena):</label>
-                    <textarea name="criterios-${categoriaId}-${criterioCount}-puntaje-4" class="border border-gray-300 p-2 rounded w-full"></textarea>
-
-                    <label for="criterios-${categoriaId}-${criterioCount}-puntaje-5" class="block mt-2">5 (Excelente):</label>
-                    <textarea name="criterios-${categoriaId}-${criterioCount}-puntaje-5" class="border border-gray-300 p-2 rounded w-full"></textarea>
-                </div>
-
-                <button type="button" onclick="eliminarCriterio(${categoriaId}, ${criterioCount})" class="bg-red-500 text-white px-3 py-1 rounded mt-2">Eliminar Criterio</button>
+    // Función para agregar una nueva categoría
+    document.getElementById('btn-agregar-categoria').addEventListener('click', function() {
+        categoriaCount++;
+        const categoriasDiv = document.getElementById('categorias');
+        const newCategoria = document.createElement('div');
+        newCategoria.classList.add('categoria-item', 'mb-4', 'p-4', 'border', 'rounded-lg', 'bg-gray-50', 'dark:bg-gray-700', 'shadow-sm');
+        newCategoria.innerHTML = `
+            <h4 class="font-bold text-lg mb-2 text-gray-800 dark:text-white">Nueva Categoría</h4>
+            <input type="text" name="nueva_categoria_nombre_${categoriaCount}" placeholder="Nombre de la categoría" class="w-full p-2 border rounded-lg mb-2 dark:bg-gray-600 dark:text-white">
+            <input type="text" name="nueva_categoria_descripcion_${categoriaCount}" placeholder="Descripción de la categoría" class="w-full p-2 border rounded-lg mb-2 dark:bg-gray-600 dark:text-white">
+            <h5 class="font-semibold mt-2 text-gray-800 dark:text-white">Criterios:</h5>
+            <table class="min-w-full border-collapse border border-gray-300 mt-2 dark:border-gray-600">
+                <thead>
+                    <tr class="bg-gray-200 dark:bg-gray-600">
+                        <th class="border border-gray-300 p-2 dark:border-gray-600">Nombre del Criterio</th>
+                        <th class="border border-gray-300 p-2 dark:border-gray-600">Descripción</th>
+                        <th class="border border-gray-300 p-2 dark:border-gray-600">Puntaje 1</th>
+                        <th class="border border-gray-300 p-2 dark:border-gray-600">Puntaje 2</th>
+                        <th class="border border-gray-300 p-2 dark:border-gray-600">Puntaje 3</th>
+                        <th class="border border-gray-300 p-2 dark:border-gray-600">Puntaje 4</th>
+                        <th class="border border-gray-300 p-2 dark:border-gray-600">Puntaje 5</th>
+                        <th class="border border-gray-300 p-2 dark:border-gray-600">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="criterios-${categoriaCount}"></tbody>
+            </table>
+            <div class="flex justify-between mt-4">
+                <button type="button" class="btn-agregar-criterio bg-green-500 text-white p-2 rounded-lg hover:bg-green-600" data-categoria-id="${categoriaCount}">
+                    Agregar Criterio
+                </button>
+                <button type="button" class="btn-eliminar-categoria bg-red-500 text-white p-2 rounded-lg hover:bg-red-600" data-categoria-id="${categoriaCount}">
+                    Eliminar Categoría
+                </button>
             </div>
         `;
+        categoriasDiv.appendChild(newCategoria);
+    });
 
-        criteriosDiv.insertAdjacentHTML('beforeend', nuevoCriterio);
-    }
-
-    // Función para eliminar una categoría
-    function eliminarCategoria(categoriaId) {
-        const categoriaDiv = document.getElementById(`categoria-${categoriaId}`);
-        if (categoriaDiv) {
-            categoriaDiv.remove();
-
-            // Actualizar el conteo de categorías
-            let categoriasCount = document.getElementById('categorias_count');
-            categoriasCount.value = parseInt(categoriasCount.value) - 1;
+    // Delegar el evento de clic para agregar criterios
+    document.getElementById('categorias').addEventListener('click', function(event) {
+        if (event.target.classList.contains('btn-agregar-criterio')) {
+            const categoriaId = event.target.getAttribute('data-categoria-id');
+            const tbody = document.getElementById(`criterios-${categoriaId}`);
+            const newCriterio = document.createElement('tr');
+            newCriterio.innerHTML = `
+                <td class="border border-gray-300 p-2 dark:border-gray-600">
+                    <input type="text" name="nuevo_criterio_nombre_${categoriaId}[]" placeholder="Nombre del criterio" class="w-full p-2 border rounded-lg dark:bg-gray-500 dark:text-white">
+                </td>
+                <td class="border border-gray-300 p-2 dark:border-gray-600">
+                    <input type="text" name="nuevo_criterio_descripcion_${categoriaId}[]" placeholder="Descripción del criterio" class="w-full p-2 border rounded-lg dark:bg-gray-500 dark:text-white">
+                </td>
+                <td class="border border-gray-300 p-2 dark:border-gray-600">
+                    <input type="text" name="descripcion_puntaje_nuevo_${categoriaId}_1[]" placeholder="Descripción del puntaje" class="w-full p-2 border rounded-lg dark:bg-gray-500 dark:text-white">
+                </td>
+                <td class="border border-gray-300 p-2 dark:border-gray-600">
+                    <input type="text" name="descripcion_puntaje_nuevo_${categoriaId}_2[]" placeholder="Descripción del puntaje" class="w-full p-2 border rounded-lg dark:bg-gray-500 dark:text-white">
+                </td>
+                <td class="border border-gray-300 p-2 dark:border-gray-600">
+                    <input type="text" name="descripcion_puntaje_nuevo_${categoriaId}_3[]" placeholder="Descripción del puntaje" class="w-full p-2 border rounded-lg dark:bg-gray-500 dark:text-white">
+                </td>
+                <td class="border border-gray-300 p-2 dark:border-gray-600">
+                    <input type="text" name="descripcion_puntaje_nuevo_${categoriaId}_4[]" placeholder="Descripción del puntaje" class="w-full p-2 border rounded-lg dark:bg-gray-500 dark:text-white">
+                </td>
+                <td class="border border-gray-300 p-2 dark:border-gray-600">
+                    <input type="text" name="descripcion_puntaje_nuevo_${categoriaId}_5[]" placeholder="Descripción del puntaje" class="w-full p-2 border rounded-lg dark:bg-gray-500 dark:text-white">
+                </td>
+                <td class="border border-gray-300 p-2 dark:border-gray-600">
+                    <button type="button" class="btn-eliminar-criterio text-red-500 hover:text-red-700">Eliminar</button>
+                </td>
+            `;
+            tbody.appendChild(newCriterio);
         }
-    }
+    });
 
-    // Función para eliminar un criterio dentro de una categoría
-    function eliminarCriterio(categoriaId, criterioId) {
-        const criterioDiv = document.getElementById(`criterio-${categoriaId}-${criterioId}`);
-        if (criterioDiv) {
-            criterioDiv.remove();
-
-            // Actualizar el conteo de criterios de esa categoría
-            let criteriosCount = document.getElementById(`criterios_count-${categoriaId}`);
-            criteriosCount.value = parseInt(criteriosCount.value) - 1;
+    // Delegar el evento de clic para eliminar criterios
+    document.getElementById('categorias').addEventListener('click', function(event) {
+        if (event.target.classList.contains('btn-eliminar-criterio')) {
+            event.target.closest('tr').remove();
         }
-    }
+    });
+
+    // Delegar el evento de clic para eliminar categorías
+    document.getElementById('categorias').addEventListener('click', function(event) {
+        if (event.target.classList.contains('btn-eliminar-categoria')) {
+            event.target.closest('.categoria-item').remove();
+        }
+    });
+
+    // Mostrar el modal de confirmación
+    document.getElementById('btn-guardar-cambios').addEventListener('click', function() {
+        document.getElementById('confirmModal').classList.remove('hidden');
+    });
+
+    // Ocultar el modal de confirmación
+    document.getElementById('cancelar').addEventListener('click', function() {
+        document.getElementById('confirmModal').classList.add('hidden');
+    });
+
+    // Confirmar y enviar el formulario
+    document.getElementById('confirmar').addEventListener('click', function() {
+        document.getElementById('rubricaForm').submit();
+    });
+});
 </script>
+
+<!-- Modal de confirmación -->
+<div id="confirmModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden">
+    <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg">
+        <h2 class="text-xl font-bold mb-4 text-gray-800 dark:text-white">Confirmación</h2>
+        <p class="mb-4 text-gray-700 dark:text-gray-300">¿Estás seguro de que deseas guardar esta rúbrica?</p>
+        <div class="flex justify-end">
+            <button id="cancelar" class="mr-2 bg-gray-500 text-white py-2 px-4 rounded-lg hover:bg-gray-600">Cancelar</button>
+            <button id="confirmar" class="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600">Confirmar</button>
+        </div>
+    </div>
+</div>
+
 {% endblock %}

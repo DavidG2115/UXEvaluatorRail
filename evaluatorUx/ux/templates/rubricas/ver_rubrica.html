@@ -5,6 +5,18 @@
     <h2 class="text-2xl font-bold mb-4">Rúbrica: {{ rubrica.nombre }}</h2>
     <p class="mb-4">{{ rubrica.descripcion }}</p>
 
+    <!-- Sección de instrucciones -->
+    <div class="bg-blue-100 p-4 rounded-lg border border-blue-300 dark:bg-blue-700 dark:border-blue-600 mb-6">
+        <h3 class="text-lg font-semibold text-blue-800 dark:text-blue-200">Instrucciones</h3>
+        <p class="text-blue-700 dark:text-blue-300">A continuación se muestra la rúbrica con sus categorías y criterios. Puedes realizar las siguientes acciones:</p>
+        <ul class="list-disc list-inside text-blue-700 dark:text-blue-300">
+            <li><strong>Regresar:</strong> Volver a la página de selección de rúbricas.</li>
+            <li><strong>Editar Rúbrica:</strong> Modificar la rúbrica actual.</li>
+            <li><strong>Realizar Evaluación:</strong> Evaluar utilizando esta rúbrica.</li>
+            <li><strong>Eliminar Rúbrica:</strong> Eliminar la rúbrica actual (requiere confirmación).</li>
+        </ul>
+    </div>
+
     <h3 class="text-xl font-semibold mb-2">Categorías:</h3>
     <div class="space-y-4">
         {% for item in categorias_con_criterios %}
@@ -78,17 +90,32 @@
             <p>No hay categorías en esta rúbrica.</p>
         {% endfor %}
     </div>
+
+    <!-- Contenedor de botones -->
+    <div class="mt-6 flex justify-between items-center">
+        <!-- Botón para regresar -->
+        <a href="{% url 'seleccionar_rubrica' %}" class="bg-gray-500 text-white font-bold py-2 px-4 rounded hover:bg-gray-600 transition duration-200 ease-in-out hover:scale-105">
+            Regresar
+        </a>
+
+        <!-- Botón para editar la rúbrica -->
+        <a href="{% url 'editar_rubrica' rubrica.id %}" class="bg-yellow-500 text-white font-bold py-2 px-4 rounded hover:bg-yellow-600 transition duration-200 ease-in-out hover:scale-105">
+            Editar Rúbrica
+        </a>
+
+        <!-- Botón para realizar la evaluación -->
+        <a href="{% url 'realizar_evaluacion' rubrica.id %}" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded transition duration-300 ease-in-out hover:scale-105">
+            Realizar Evaluación
+        </a>
+
+        <!-- Botón para eliminar la rúbrica -->
+        <button id="deleteRubricButton" class="bg-red-500 text-white font-bold py-2 px-4 rounded hover:bg-red-600 transition duration-200 ease-in-out hover:scale-105" onclick="openModal()">
+            Eliminar Rúbrica
+        </button>
+    </div>
 </div>
 
-<a href="{% url 'editar_rubrica' rubrica.id %}" class="p-2 bg-yellow-500 text-white rounded-lg dark:bg-yellow-600">Editar Rúbrica</a>
-
-<!-- Botón para abrir el modal -->
-<button id="deleteRubricButton" class="p-2 bg-red-500 text-white rounded-lg dark:bg-red-600" onclick="openModal()">Eliminar Rúbrica</button>
-
-<!-- Botón para realizar la evaluación -->
-<a href="{% url 'realizar_evaluacion' rubrica.id %}" class="p-2 bg-blue-500 text-white rounded-lg dark:bg-blue-600">Realizar Evaluación</a>
-
-<!-- Modal -->
+<!-- Modal de confirmación -->
 <div id="deleteModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden">
     <div class="bg-white p-6 rounded-lg shadow-lg dark:bg-gray-700 dark:text-gray-100">
         <h3 class="text-lg font-bold">¿Estás seguro de que quieres eliminar esta rúbrica?</h3>

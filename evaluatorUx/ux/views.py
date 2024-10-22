@@ -332,6 +332,14 @@ def ver_evaluacion(request, evaluacion_id):
     return render(request, 'rubricas/ver_evaluacion.html', context)
 
 
+def eliminar_evaluacion(request, evaluacion_id):
+    evaluacion = get_object_or_404(EvaluacionGeneral, id=evaluacion_id)
+    if request.method == 'POST':
+        evaluacion.delete()
+        messages.success(request, 'La evaluación ha sido eliminada exitosamente.')
+        return redirect('index')  
+    return render(request, 'rubricas/ver_evaluacion.html', {'evaluacion_general': evaluacion})
+
 def generar_pdf(request, evaluacion_id):
     from reportlab.lib.styles import getSampleStyleSheet
     styles = getSampleStyleSheet()
