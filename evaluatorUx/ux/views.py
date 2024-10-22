@@ -1,6 +1,9 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages  # Import the messages module
+from django.contrib.auth.forms import AuthenticationForm, UserCreationForm  # Import the AuthenticationForm and UserCreationForm
+from django.contrib.auth import authenticate, login, logout  # Import the authenticate, login, and logout functions
 from .forms import RubricaForm, EvaluacionGeneralForm, CalificacionForm  # Import the RubricaForm
+from django.contrib.auth.decorators import login_required  # Import the login_required decorator
 from .models import Criterio, Categoria, Rubrica, DescripcionPuntaje, Calificacion, EvaluacionGeneral  # Import the Rubrica and Categoria models
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
@@ -11,14 +14,51 @@ from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph
 from django.http import HttpResponse
 from reportlab.lib import colors
 
+
+def login_view(request):
+    if request.user.is_authenticated:
+        return redirect('index')
+    
+    if request.method == 'POST':
+        form = AuthenticationForm(request, data=request.POST)
+        if form.is_valid():
+            username = form.cleaned_data.get('username')
+            password = form.cleaned_data.get('password')
+            user = authenticate(username=username, password=password)
+            if user is not None:
+                login(request, user)
+                return redirect('index')
+    else:
+        form = AuthenticationForm()
+    return render(request, 'registration/login.html', {'form': form})
+
+def register_view(request):
+    if request.user.is_authenticated:
+        return redirect('index')
+    
+    if request.method == 'POST':
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+            return redirect('index')
+    else:
+        form = UserCreationForm()
+    return render(request, 'registration/registro.html', {'form': form})
+
+def logout_view(request):
+    logout(request)
+    return redirect('login')
+
+@login_required
 def index(request):
-    evaluaciones = EvaluacionGeneral.objects.filter(usuario=request.user)
+    evaluaciones = EvaluacionGeneral.objects.filter(usuario=request.user).order_by('-fecha')
 
     context = {
         'evaluaciones': evaluaciones,
     }
     return render(request, 'rubricas/index.html', context)
-
+@login_required
 def crear_rubrica(request):
     rubrica_predefinida = Rubrica.objects.filter(predefinida=True).first()
 
@@ -101,7 +141,7 @@ def crear_rubrica(request):
             return redirect('seleccionar_rubrica')  # Redirigir a una vista donde se liste las rúbricas
 
     return render(request, 'rubricas/crear.html', {'rubrica_predefinida': rubrica_predefinida})
-
+@login_required
 def seleccionar_rubrica(request):
     rubricas = Rubrica.objects.filter(usuario=request.user)
     
@@ -114,6 +154,7 @@ def seleccionar_rubrica(request):
 
     return render(request, 'rubricas/seleccionar.html', {'rubricas': rubricas})
 
+@login_required
 def ver_rubrica(request, rubrica_id):
     rubrica = get_object_or_404(Rubrica, id=rubrica_id)
     categorias = Categoria.objects.filter(rubrica=rubrica).prefetch_related('criterios__descripciones')
@@ -148,6 +189,7 @@ def ver_rubrica(request, rubrica_id):
     
     return render(request, 'rubricas/ver_rubrica.html', context)
 
+@login_required
 def editar_rubrica(request, rubrica_id):
     rubrica = get_object_or_404(Rubrica, id=rubrica_id)
     
@@ -255,6 +297,7 @@ def editar_rubrica(request, rubrica_id):
     }
     return render(request, 'rubricas/editar_rubrica.html', context)
 
+@login_required
 def eliminar_rubrica(request, rubrica_id):
     rubrica = get_object_or_404(Rubrica, id=rubrica_id)
     rubrica.delete()
@@ -262,7 +305,7 @@ def eliminar_rubrica(request, rubrica_id):
 
 
 
-# views.py
+@login_required
 def realizar_evaluacion(request, rubrica_id):
     rubrica = get_object_or_404(Rubrica, id=rubrica_id)
     categorias = Categoria.objects.filter(rubrica=rubrica).prefetch_related('criterios__descripciones')
@@ -320,7 +363,7 @@ def realizar_evaluacion(request, rubrica_id):
     }
     return render(request, 'rubricas/realizar_evaluacion.html', context)
 
-
+@login_required
 def ver_evaluacion(request, evaluacion_id):
     evaluacion_general = get_object_or_404(EvaluacionGeneral, id=evaluacion_id)
     calificaciones = Calificacion.objects.filter(evaluacion_general=evaluacion_general).select_related('criterio')
@@ -331,7 +374,7 @@ def ver_evaluacion(request, evaluacion_id):
     }
     return render(request, 'rubricas/ver_evaluacion.html', context)
 
-
+@login_required
 def eliminar_evaluacion(request, evaluacion_id):
     evaluacion = get_object_or_404(EvaluacionGeneral, id=evaluacion_id)
     if request.method == 'POST':
@@ -340,6 +383,7 @@ def eliminar_evaluacion(request, evaluacion_id):
         return redirect('index')  
     return render(request, 'rubricas/ver_evaluacion.html', {'evaluacion_general': evaluacion})
 
+@login_required
 def generar_pdf(request, evaluacion_id):
     from reportlab.lib.styles import getSampleStyleSheet
     styles = getSampleStyleSheet()

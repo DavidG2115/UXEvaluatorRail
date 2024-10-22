@@ -6,7 +6,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Django + Tailwind CSS + Flowbite</title>
+    <title>Ux Evaluator</title>
      <!-- Font Awesome -->
      <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
     
@@ -70,17 +70,37 @@
       <button onclick="toggleTheme()" class="focus:outline-none text-white dark:text-white p-2 hover:bg-gray-700 dark:hover:bg-gray-300 rounded-full transition-colors">
         <i id="theme-icon" class="fas fa-moon text-2xl"></i> <!-- Icono que cambia entre luna y sol -->
       </button>
+      
 
-      <!-- Perfil con dropdown -->
+      
+      
+
+      <!-- Botón de perfil con dropdown -->
       <div class="relative">
-        <button class="text-white dark:text-white flex items-center space-x-2 hover:bg-gray-700 dark:hover:bg-gray-300 p-2 rounded-full transition-colors" id="profileMenu" aria-expanded="false">
+        <button id="dropdownHoverButton" data-dropdown-toggle="dropdownHover" data-dropdown-trigger="hover"
+          class="text-white bg-gray-800 hover:bg-gray-700 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-full text-sm px-5 py-2.5 text-center inline-flex items-center dark:bg-gray-600 dark:hover:bg-gray-500 dark:focus:ring-gray-700 transition-all"
+          type="button">
           <i class="fas fa-user text-xl"></i> <!-- Icono de usuario -->
-          <span>Perfil</span>
+          <span class="ml-2">Perfil</span>
+          <svg class="w-2.5 h-2.5 ml-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 1l4 4 4-4" />
+          </svg>
         </button>
-        <ul class="absolute right-0 mt-2 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white shadow-xl rounded-lg py-2 hidden" id="profileDropdown">
-          {% comment %} <li><a href="{% url 'logout_view' %}" class="block px-4 py-2 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">Cerrar sesión</a></li> {% endcomment %}
-        </ul>
+
+        <!-- Dropdown menu -->
+        <div id="dropdownHover" class="z-10 hidden bg-white divide-y divide-gray-100 rounded-lg shadow w-44 dark:bg-gray-700">
+          <ul class="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
+            <li>
+              <a href="{% url 'logout' %}" class="block px-4 py-2 hover:bg-gray-400 dark:hover:bg-gray-500 dark:hover:text-white">
+                Cerrar sesión
+              </a>
+            </li>
+          </ul>
+        </div>
       </div>
+
+
+
     </div>
   </div>
 </nav>

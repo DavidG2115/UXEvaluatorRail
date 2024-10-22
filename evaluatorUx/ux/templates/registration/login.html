@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+
+{% block title %}UX Evaluator{% endblock %}
+
+{% block content %}
+<section class="bg-gray-800 dark:bg-gray-900 min-h-screen flex justify-center items-center">
+    <div class="container py-10 h-full">
+        <div class="flex justify-center items-center h-full">
+            <div class="w-full max-w-5xl">
+                <div class="bg-white dark:bg-gray-800 shadow-2xl rounded-lg overflow-hidden">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-0">
+                        <div class="hidden md:flex justify-center items-center bg-gray-200 dark:bg-gray-700">
+                            <img src="https://scand.de/wp-content/uploads/2023/11/UXUI-main.svg" alt="login form" class="object-cover w-full h-full" />
+                        </div>
+                        <div class="flex items-center p-8 md:p-10">
+                            <div class="w-full text-gray-900 dark:text-gray-100">
+                                <form action="" method="post">
+                                    {% csrf_token %}
+                                    <div class="flex items-center mb-8">
+                                        <i class="fas fa-tasks text-3xl text-blue-500 dark:text-blue-200 mr-4"></i>
+                                        <span class="text-3xl font-bold">UXEval</span>
+                                    </div>
+
+                                    <h5 class="text-xl font-medium mb-6">Inicia sesión en tu cuenta</h5>
+
+                                    <div class="relative mb-6">
+                                        <i class="fas fa-user absolute left-3 top-3 text-gray-400 dark:text-gray-300"></i>
+                                        <input type="text" name="username" id="username" class="form-input block w-full pl-10 py-3 rounded-lg border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:placeholder-gray-400" required>
+                                        {% if form.username.errors %}
+                                            <div class="text-red-500 text-sm mt-2">{{ form.username.errors }}</div>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <div class="relative mb-6">
+                                        <i class="fas fa-lock absolute left-3 top-3 text-gray-400 dark:text-gray-300"></i>
+                                        <input type="password" name="password" id="password" class="form-input block w-full pl-10 py-3 rounded-lg border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:placeholder-gray-400" required>
+                                        {% if form.password.errors %}
+                                            <div class="text-red-500 text-sm mt-2">{{ form.password.errors }}</div>
+                                        {% endif %}
+                                    </div>
+
+                                    <div class="mb-6">
+                                        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-semibold text-lg transition duration-200">Ingresar</button>
+                                    </div>
+
+                                    {% if form.non_field_errors %}
+                                        <div class="text-red-500 text-sm">{{ form.non_field_errors.0 }}</div>
+                                    {% endif %}
+
+                                    <!-- Login redirect link -->
+                                    <div class="footer-links text-sm">
+                                        <p class="mb-5 pb-lg-2">No tienes cuenta? <a href="{% url 'registro' %}" class="text-blue-500 dark:text-gray-400">Registrate aquí</a></p>
+                                    </div>
+
+                                    <div class="footer-links text-sm">
+                                        <a class="text-blue-500 dark:text-gray-400" href="#!">Olvidé la contraseña</a>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+    // Modo oscuro automático dependiendo del sistema o según preferencia
+    if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.documentElement.classList.add('dark');
+    }
+</script>
+{% endblock %}
