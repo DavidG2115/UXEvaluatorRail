@@ -437,7 +437,7 @@ def generar_pdf(request, evaluacion_id):
         elements.append(Paragraph(f"Categoria: {categoria.nombre}", styles['Heading2']))
 
         # Crear la tabla de calificaciones
-        data = [['Nombre del Criterio', 'Descripción', 'Calificación', 'Comentario']]
+        data = [['Nombre del Criterio', 'Calificación', 'Comentario']]
         total_calificacion = 0
         count_calificaciones = 0
 
@@ -445,7 +445,6 @@ def generar_pdf(request, evaluacion_id):
             if calificacion.criterio.categoria == categoria:
                 data.append([
                     calificacion.criterio.nombre,
-                    calificacion.criterio.descripcion,
                     calificacion.get_puntaje_display(),
                     calificacion.comentario
                 ])
@@ -497,6 +496,12 @@ def generar_pdf(request, evaluacion_id):
     bar_chart.data = [[calificacion.puntaje for calificacion in calificaciones]]
     bar_chart.categoryAxis.categoryNames = [calificacion.criterio.nombre for calificacion in calificaciones]
     bar_chart.bars[0].fillColor = colors.HexColor('#4BC0C0')
+
+    # Rotar las etiquetas del eje X
+    bar_chart.categoryAxis.labels.angle = 90
+    bar_chart.categoryAxis.labels.dy = -10 
+    bar_chart.categoryAxis.labels.boxAnchor = 'e'
+    # Ajustar la posición vertical de las etiquetas
 
     drawing.add(bar_chart)
     elements.append(drawing)   
