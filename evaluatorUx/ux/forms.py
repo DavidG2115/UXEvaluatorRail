@@ -11,7 +11,7 @@ class RubricaForm(forms.ModelForm):
                 'placeholder': 'Nombre de la rúbrica'
             }),
             'descripcion': forms.Textarea(attrs={
-                'class': 'w-full p-2 mb-2 border rounded-lg dark:bg-gray-600 dark:text-white',
+                'class': 'w-full h-10 p-2 mb-2 border rounded-lg dark:bg-gray-600 dark:text-white',
                 'placeholder': 'Descripción de la rúbrica'
             }),
         }

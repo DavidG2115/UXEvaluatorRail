@@ -54,9 +54,11 @@ def logout_view(request):
 @login_required
 def index(request):
     evaluaciones = EvaluacionGeneral.objects.filter(usuario=request.user).order_by('-fecha')
+    rubricas = Rubrica.objects.filter(usuario=request.user)
 
     context = {
         'evaluaciones': evaluaciones,
+        'rubricas': rubricas,
     }
     return render(request, 'rubricas/index.html', context)
 @login_required

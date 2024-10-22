@@ -7,12 +7,18 @@
     <h1 class="text-center text-4xl font-bold mb-8 text-gray-800 dark:text-white">Bienvenido a la Evaluación UX</h1>
 
     <div class="flex justify-center mt-8">
-        <a href="{% url 'seleccionar_rubrica' %}" class="bg-green-600 hover:bg-green-500 text-white py-3 px-6 rounded-lg shadow-lg transition duration-300 transform hover:scale-105">
-            Comenzar
-        </a>
+        {% if rubricas %}
+            <a href="{% url 'seleccionar_rubrica' %}" class="bg-green-500 hover:bg-green-600 text-white py-3 px-6 rounded-lg shadow-lg animate-pulse transition duration-300 transform hover:scale-105">
+                Ver rúbricas y comenzar
+            </a>
+        {% else %}
+            <a href="{% url 'crear_rubrica' %}" class="bg-green-500 hover:bg-green-600 text-white py-3 px-6 rounded-lg shadow-lg animate-pulse transition duration-300 transform hover:scale-105">
+                Crear rúbrica
+            </a>
+        {% endif %}
     </div>
 
-    <h2 class="text-center text-3xl font-semibold mb-6 text-gray-800 dark:text-white">Evaluaciones Realizadas</h2>
+    <h2 class="text-center text-3xl font-semibold p-2 mb-6 mt-6 text-gray-800 dark:text-white">Evaluaciones Realizadas</h2>
 
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {% if evaluaciones %}
@@ -36,11 +42,6 @@
             <div class="text-center col-span-full">
                 <p class="text-gray-700 text-lg mb-2 dark:text-gray-300">No has realizado evaluaciones aún.</p>
                 <p class="text-gray-600 mb-6 dark:text-gray-400">¡Comienza tu primera evaluación para mejorar la experiencia de usuario!</p>
-                <div class="flex justify-center">
-                    <a href="{% url 'crear_rubrica' %}" class="bg-green-500 hover:bg-green-600 text-white py-3 px-6 rounded-lg shadow-lg animate-pulse transition duration-300 transform hover:scale-105">
-                        Comenzar Evaluación
-                    </a>
-                </div>
             </div>
         {% endif %}
     </div>
