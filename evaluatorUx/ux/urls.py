@@ -14,6 +14,5 @@ urlpatterns = [
     path('rubrica/<int:rubrica_id>/evaluar/', realizar_evaluacion, name='realizar_evaluacion'),
     path('evaluacion/<int:evaluacion_id>/', ver_evaluacion, name='ver_evaluacion'),
     path('evaluacion/<int:evaluacion_id>/pdf/', generar_pdf, name='generar_pdf'),
-    path('generar_pdf_con_grafico/<int:evaluacion_id>/', generar_pdf_con_grafico, name='generar_pdf_con_grafico'),
     path('eliminar_evaluacion/<int:evaluacion_id>/', eliminar_evaluacion, name='eliminar_evaluacion'),
 ]

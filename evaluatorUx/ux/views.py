@@ -10,9 +10,10 @@ from reportlab.pdfgen import canvas
 from reportlab.graphics.shapes import Drawing
 from reportlab.graphics.charts.barcharts import VerticalBarChart
 from reportlab.graphics import renderPDF
-from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
 from django.http import HttpResponse
 from reportlab.lib import colors
+from reportlab.lib.styles import getSampleStyleSheet
 
 
 def login_view(request):
@@ -368,9 +369,15 @@ def ver_evaluacion(request, evaluacion_id):
     evaluacion_general = get_object_or_404(EvaluacionGeneral, id=evaluacion_id)
     calificaciones = Calificacion.objects.filter(evaluacion_general=evaluacion_general).select_related('criterio')
 
+    # Preparar los datos para la gráfica
+    labels = [calificacion.criterio.nombre for calificacion in calificaciones]
+    data = [calificacion.puntaje for calificacion in calificaciones]
+
     context = {
         'evaluacion_general': evaluacion_general,
         'calificaciones': calificaciones,
+        'labels': labels,
+        'data': data,
     }
     return render(request, 'rubricas/ver_evaluacion.html', context)
 
@@ -383,9 +390,20 @@ def eliminar_evaluacion(request, evaluacion_id):
         return redirect('index')  
     return render(request, 'rubricas/ver_evaluacion.html', {'evaluacion_general': evaluacion})
 
+def obtener_descripcion_promedio(promedio):
+    if promedio <= 1:
+        return "Muy Deficiente"
+    elif promedio <= 2:
+        return "Deficiente"
+    elif promedio <= 3:
+        return "Regular"
+    elif promedio <= 4:
+        return "Buena"
+    else:
+        return "Excelente"
+    
 @login_required
 def generar_pdf(request, evaluacion_id):
-    from reportlab.lib.styles import getSampleStyleSheet
     styles = getSampleStyleSheet()
 
     # Obtener la evaluación general y las calificaciones
@@ -394,23 +412,33 @@ def generar_pdf(request, evaluacion_id):
 
     # Crear un objeto HttpResponse con el tipo de contenido adecuado
     response = HttpResponse(content_type='application/pdf')
-    response['Content-Disposition'] = f'attachment; filename="reporte_evaluacion_{evaluacion_id}.pdf"'
+    response['Content-Disposition'] = f'attachment; filename="reporte_evaluacion_{evaluacion_general.nombre_software}_{evaluacion_general.fecha.strftime("%d-%m-%Y")}.pdf"'
 
     # Crear un objeto canvas
     doc = SimpleDocTemplate(response, pagesize=letter)
     elements = []
 
+    # Agregar metadatos al PDF
+    doc.title = f"Reporte de Evaluación - {evaluacion_general.nombre_software}"
+    doc.author = request.user.username
+
+    # Formatear la fecha
+    fecha_formateada = evaluacion_general.fecha.strftime("%d-%m-%Y")
+
     # Agregar información de la evaluación al PDF
     elements.append(Paragraph(f"Evaluación de {evaluacion_general.nombre_software}", styles['Title']))
-    elements.append(Paragraph(f"Fecha: {evaluacion_general.fecha}", styles['Normal']))
+    elements.append(Paragraph(f"Realizada por: {evaluacion_general.usuario.username}", styles['Normal']))
+    elements.append(Paragraph(f"Fecha: {fecha_formateada}", styles['Normal']))
 
     # Agregar categorías y calificaciones
     for categoria in evaluacion_general.rubrica.categorias.all():
-        elements.append(Paragraph(categoria.nombre, styles['Heading2']))
-        elements.append(Paragraph(categoria.descripcion, styles['Normal']))
+        elements.append(Paragraph(f"Categoria: {categoria.nombre}", styles['Heading2']))
 
         # Crear la tabla de calificaciones
         data = [['Nombre del Criterio', 'Descripción', 'Calificación', 'Comentario']]
+        total_calificacion = 0
+        count_calificaciones = 0
+
         for calificacion in calificaciones:
             if calificacion.criterio.categoria == categoria:
                 data.append([
@@ -419,6 +447,8 @@ def generar_pdf(request, evaluacion_id):
                     calificacion.get_puntaje_display(),
                     calificacion.comentario
                 ])
+                total_calificacion += calificacion.puntaje
+                count_calificaciones += 1
 
         # Si no hay calificaciones, agregar un mensaje
         if len(data) == 1:
@@ -426,69 +456,50 @@ def generar_pdf(request, evaluacion_id):
 
         table = Table(data)
         table.setStyle(TableStyle([
-            ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
-            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#02AC66')),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.black), 
             ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
             ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
             ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
-            ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
             ('GRID', (0, 0), (-1, -1), 1, colors.black),
         ]))
+        # Alternar el color de fondo de las filas entre blanco y gris claro
+        for i in range(1, len(data)):
+            bg_color = colors.HexColor("#E0E0E0") if i % 2 == 0 else colors.white
+            table.setStyle(TableStyle([
+                ('BACKGROUND', (0, i), (-1, i), bg_color),
+            ]))
+            
         elements.append(table)
+
+        # Agregar un espacio entre la tabla y los textos de calificación total y promedio
+        elements.append(Spacer(1, 12))
+
+        # Agregar calificación total al final de la categoría
+        if count_calificaciones > 0:
+            promedio_calificacion = total_calificacion / count_calificaciones
+            descripcion_promedio = obtener_descripcion_promedio(promedio_calificacion)
+            elements.append(Paragraph(f"Calificación Total: {total_calificacion}", styles['Normal']))
+            elements.append(Paragraph(f"Promedio de Calificación: {descripcion_promedio}", styles['Normal']))
+
+        # Agregar un espacio después de cada categoría
+        elements.append(Spacer(1, 24))
+        
+    # Crear la gráfica de barras
+    drawing = Drawing(400, 200)
+    bar_chart = VerticalBarChart()
+    bar_chart.x = 50
+    bar_chart.y = 50
+    bar_chart.height = 125
+    bar_chart.width = 300
+    bar_chart.data = [[calificacion.puntaje for calificacion in calificaciones]]
+    bar_chart.categoryAxis.categoryNames = [calificacion.criterio.nombre for calificacion in calificaciones]
+    bar_chart.bars[0].fillColor = colors.HexColor('#4BC0C0')
+
+    drawing.add(bar_chart)
+    elements.append(drawing)   
 
     # Construir el PDF
     doc.build(elements)
-
-    return response
-
-
-def generar_pdf_con_grafico(request, evaluacion_id):
-    # Obtener la evaluación general y las calificaciones
-    evaluacion_general = get_object_or_404(EvaluacionGeneral, id=evaluacion_id)
-    calificaciones = Calificacion.objects.filter(evaluacion_general=evaluacion_general).select_related('criterio')
-
-    # Crear un objeto HttpResponse con el tipo de contenido adecuado
-    response = HttpResponse(content_type='application/pdf')
-    response['Content-Disposition'] = f'attachment; filename="reporte_evaluacion_{evaluacion_id}.pdf"'
-
-    # Crear un objeto canvas
-    p = canvas.Canvas(response, pagesize=letter)
-    width, height = letter
-
-    # Agregar información de la evaluación al PDF
-    p.drawString(100, height - 100, f"Evaluación ID: {evaluacion_general.id}")
-    p.drawString(100, height - 120, f"Nombre: {evaluacion_general.nombre}")
-    p.drawString(100, height - 140, f"Fecha: {evaluacion_general.fecha}")
-
-    # Crear un gráfico de barras con las calificaciones
-    drawing = Drawing(400, 200)
-    data = [calificacion.valor for calificacion in calificaciones]
-    criterios = [calificacion.criterio.nombre for calificacion in calificaciones]
-    bc = VerticalBarChart()
-    bc.x = 50
-    bc.y = 50
-    bc.height = 125
-    bc.width = 300
-    bc.data = [data]
-    bc.strokeColor = colors.black
-
-    bc.valueAxis.valueMin = 0
-    bc.valueAxis.valueMax = 10  # Ajusta según el rango de tus calificaciones
-    bc.valueAxis.valueStep = 1
-
-    bc.categoryAxis.labels.boxAnchor = 'ne'
-    bc.categoryAxis.labels.dx = 8
-    bc.categoryAxis.labels.dy = -2
-    bc.categoryAxis.labels.angle = 30
-    bc.categoryAxis.categoryNames = criterios
-
-    drawing.add(bc)
-
-    # Agregar el gráfico al PDF
-    renderPDF.draw(drawing, p, 100, height - 400)
-
-    # Guardar el PDF
-    p.showPage()
-    p.save()
 
     return response
