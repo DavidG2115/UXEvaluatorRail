@@ -1,0 +1,200 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mx-auto p-4 dark:bg-gray-800 dark:text-gray-100">
+    <h2 class="text-2xl font-bold mb-4 text-gray-800 dark:text-white">Editar Rúbrica</h2>
+
+    <form method="POST" id="rubricaForm">
+        {% csrf_token %}
+        {{ rubrica_form.as_p }}
+
+        <h3 class="text-xl font-semibold mb-2 text-gray-800 dark:text-white">Categorías:</h3>
+
+        <div id="categorias">
+            {% for categoria in categorias %}
+                <div class="categoria-item mb-4 p-4 border rounded-lg bg-gray-50 dark:bg-gray-700 shadow-sm">
+                    <h4 class="font-bold text-lg mb-2 text-gray-800 dark:text-white">{{ categoria.nombre }}</h4>
+                    <input type="text" name="categoria_nombre_{{ categoria.id }}" value="{{ categoria.nombre }}" placeholder="Nombre de la categoría" class="w-full p-2 border rounded-lg mb-2 dark:bg-gray-600 dark:text-white">
+                    <input type="text" name="categoria_descripcion_{{ categoria.id }}" value="{{ categoria.descripcion }}" placeholder="Descripción de la categoría" class="w-full p-2 border rounded-lg mb-2 dark:bg-gray-600 dark:text-white">
+                    <input type="hidden" name="eliminar_categoria_{{ categoria.id }}" value="false" class="eliminar-categoria">
+
+                    <h5 class="font-semibold mt-2 text-gray-800 dark:text-white">Criterios:</h5>
+                    <table class="min-w-full border-collapse border border-gray-300 mt-2 dark:border-gray-600">
+                        <thead>
+                            <tr class="bg-gray-200 dark:bg-gray-600">
+                                <th class="border border-gray-300 p-2 dark:border-gray-600">Nombre del Criterio</th>
+                                <th class="border border-gray-300 p-2 dark:border-gray-600">Descripción</th>
+                                <th class="border border-gray-300 p-2 dark:border-gray-600">Puntaje 1</th>
+                                <th class="border border-gray-300 p-2 dark:border-gray-600">Puntaje 2</th>
+                                <th class="border border-gray-300 p-2 dark:border-gray-600">Puntaje 3</th>
+                                <th class="border border-gray-300 p-2 dark:border-gray-600">Puntaje 4</th>
+                                <th class="border border-gray-300 p-2 dark:border-gray-600">Puntaje 5</th>
+                                <th class="border border-gray-300 p-2 dark:border-gray-600">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="criterios-{{ categoria.id }}">
+                            {% for criterio in categoria.criterios.all %}
+                                <tr>
+                                    <td class="border border-gray-300 p-2 dark:border-gray-600">
+                                        <input type="text" name="criterio_nombre_{{ criterio.id }}" value="{{ criterio.nombre }}" placeholder="Nombre del criterio" class="w-full p-2 border rounded-lg dark:bg-gray-500 dark:text-white">
+                                    </td>
+                                    <td class="border border-gray-300 p-2 dark:border-gray-600">
+                                        <input type="text" name="criterio_descripcion_{{ criterio.id }}" value="{{ criterio.descripcion }}" placeholder="Descripción del criterio" class="w-full p-2 border rounded-lg dark:bg-gray-500 dark:text-white">
+                                    </td>
+                                    {% for descripcion_puntaje in criterio.descripciones.all %}
+                                        <td class="border border-gray-300 p-2 dark:border-gray-600">
+                                            <input type="text" name="descripcion_puntaje_{{ criterio.id }}_{{ descripcion_puntaje.puntaje }}" value="{{ descripcion_puntaje.descripcion }}" placeholder="Descripción del puntaje" class="w-full p-2 border rounded-lg dark:bg-gray-500 dark:text-white">
+                                        </td>
+                                    {% endfor %}
+                                    <td class="border border-gray-300 p-2 dark:border-gray-600">
+                                        <input type="hidden" name="eliminar_criterio_{{ criterio.id }}" value="false" class="eliminar-criterio">
+                                        <button type="button" class="btn-eliminar-criterio text-red-500 hover:text-red-700" data-criterio-id="{{ criterio.id }}">Eliminar</button>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+
+                    <div class="flex justify-between mt-4">
+                        <button type="button" class="btn-agregar-criterio bg-green-500 text-white p-2 rounded-lg hover:bg-green-600" data-categoria-id="{{ categoria.id }}">
+                            Agregar Criterio
+                        </button>
+                        <button type="button" class="btn-eliminar-categoria bg-red-500 text-white p-2 rounded-lg hover:bg-red-600" data-categoria-id="{{ categoria.id }}">
+                            Eliminar Categoría
+                        </button>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        <button type="button" id="btn-agregar-categoria" class="mt-4 p-2 bg-green-500 text-white rounded-lg hover:bg-green-600">Agregar Categoría</button>
+
+        <button type="button" id="btn-guardar-cambios" class="mt-4 p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">Guardar cambios</button>
+        <button type="button" onclick="window.location.href = '{% url 'ver_rubrica' rubrica.id %}'" class="mt-4 p-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600">Cancelar</button>
+    </form>
+</div>
+
+<!-- Modal -->
+<div id="confirmModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden">
+    <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg">
+        <h2 class="text-xl font-bold mb-4 text-gray-800 dark:text-white">Confirmación</h2>
+        <p class="mb-4 text-gray-700 dark:text-gray-300">¿Estás seguro de que deseas aplicar los cambios?</p>
+        <div class="flex justify-end">
+            <button id="cancelar" class="mr-2 bg-gray-500 text-white py-2 px-4 rounded-lg hover:bg-gray-600">Cancelar</button>
+            <button id="confirmar" class="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600">Confirmar</button>
+        </div>
+    </div>
+</div>
+
+<script>
+// Lógica para agregar/quitar criterios y categorías dinámicamente
+document.addEventListener('DOMContentLoaded', function() {
+    // Función para agregar un nuevo criterio dinámicamente
+    document.querySelectorAll('.btn-agregar-criterio').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            const categoriaId = this.getAttribute('data-categoria-id');
+            const tbody = document.getElementById(`criterios-${categoriaId}`);
+            const newCriterio = document.createElement('tr');
+            newCriterio.innerHTML = `
+                <td class="border border-gray-300 p-2 dark:border-gray-600">
+                    <input type="text" name="nuevo_criterio_nombre_${categoriaId}[]" placeholder="Nombre del criterio" class="w-full p-2 border rounded-lg dark:bg-gray-500 dark:text-white">
+                </td>
+                <td class="border border-gray-300 p-2 dark:border-gray-600">
+                    <input type="text" name="nuevo_criterio_descripcion_${categoriaId}[]" placeholder="Descripción del criterio" class="w-full p-2 border rounded-lg dark:bg-gray-500 dark:text-white">
+                </td>
+                <td class="border border-gray-300 p-2 dark:border-gray-600">
+                    <input type="text" name="descripcion_puntaje_nuevo_${categoriaId}_1[]" placeholder="Descripción del puntaje" class="w-full p-2 border rounded-lg dark:bg-gray-500 dark:text-white">
+                </td>
+                <td class="border border-gray-300 p-2 dark:border-gray-600">
+                    <input type="text" name="descripcion_puntaje_nuevo_${categoriaId}_2[]" placeholder="Descripción del puntaje" class="w-full p-2 border rounded-lg dark:bg-gray-500 dark:text-white">
+                </td>
+                <td class="border border-gray-300 p-2 dark:border-gray-600">
+                    <input type="text" name="descripcion_puntaje_nuevo_${categoriaId}_3[]" placeholder="Descripción del puntaje" class="w-full p-2 border rounded-lg dark:bg-gray-500 dark:text-white">
+                </td>
+                <td class="border border-gray-300 p-2 dark:border-gray-600">
+                    <input type="text" name="descripcion_puntaje_nuevo_${categoriaId}_4[]" placeholder="Descripción del puntaje" class="w-full p-2 border rounded-lg dark:bg-gray-500 dark:text-white">
+                </td>
+                <td class="border border-gray-300 p-2 dark:border-gray-600">
+                    <input type="text" name="descripcion_puntaje_nuevo_${categoriaId}_5[]" placeholder="Descripción del puntaje" class="w-full p-2 border rounded-lg dark:bg-gray-500 dark:text-white">
+                </td>
+                <td class="border border-gray-300 p-2 dark:border-gray-600">
+                    <button type="button" class="btn-eliminar-criterio text-red-500 hover:text-red-700">Eliminar</button>
+                </td>
+            `;
+            tbody.appendChild(newCriterio);
+        });
+    });
+
+    // Delegar el evento de clic para eliminar criterios
+    document.getElementById('categorias').addEventListener('click', function(event) {
+        if (event.target.classList.contains('btn-eliminar-criterio')) {
+            const criterioId = event.target.getAttribute('data-criterio-id');
+            if (criterioId) {
+                document.querySelector(`input[name="eliminar_criterio_${criterioId}"]`).value = 'true';
+            }
+            event.target.closest('tr').style.display = 'none';
+        }
+    });
+
+    // Función para agregar una nueva categoría
+    document.getElementById('btn-agregar-categoria').addEventListener('click', function() {
+        const categoriasDiv = document.getElementById('categorias');
+        const newCategoria = document.createElement('div');
+        newCategoria.classList.add('categoria-item', 'mb-4', 'p-4', 'border', 'rounded-lg', 'bg-gray-50', 'dark:bg-gray-700', 'shadow-sm');
+        newCategoria.innerHTML = `
+            <h4 class="font-bold text-lg mb-2 text-gray-800 dark:text-white">Nueva Categoría</h4>
+            <input type="text" name="nueva_categoria_nombre[]" placeholder="Nombre de la categoría" class="w-full p-2 border rounded-lg mb-2 dark:bg-gray-600 dark:text-white">
+            <input type="text" name="nueva_categoria_descripcion[]" placeholder="Descripción de la categoría" class="w-full p-2 border rounded-lg mb-2 dark:bg-gray-600 dark:text-white">
+            <h5 class="font-semibold mt-2 text-gray-800 dark:text-white">Criterios:</h5>
+            <table class="min-w-full border-collapse border border-gray-300 mt-2 dark:border-gray-600">
+                <thead>
+                    <tr class="bg-gray-200 dark:bg-gray-600">
+                        <th class="border border-gray-300 p-2 dark:border-gray-600">Nombre del Criterio</th>
+                        <th class="border border-gray-300 p-2 dark:border-gray-600">Descripción</th>
+                        <th class="border border-gray-300 p-2 dark:border-gray-600">Puntaje 1</th>
+                        <th class="border border-gray-300 p-2 dark:border-gray-600">Puntaje 2</th>
+                        <th class="border border-gray-300 p-2 dark:border-gray-600">Puntaje 3</th>
+                        <th class="border border-gray-300 p-2 dark:border-gray-600">Puntaje 4</th>
+                        <th class="border border-gray-300 p-2 dark:border-gray-600">Puntaje 5</th>
+                        <th class="border border-gray-300 p-2 dark:border-gray-600">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+            <div class="flex justify-between mt-4">
+                <button type="button" class="btn-agregar-criterio bg-green-500 text-white p-2 rounded-lg hover:bg-green-600">Agregar Criterio</button>
+                <button type="button" class="btn-eliminar-categoria bg-red-500 text-white p-2 rounded-lg hover:bg-red-600">Eliminar Categoría</button>
+            </div>
+        `;
+        categoriasDiv.appendChild(newCategoria);
+    });
+
+    // Función para eliminar una categoría dinámicamente
+    document.getElementById('categorias').addEventListener('click', function(event) {
+        if (event.target.classList.contains('btn-eliminar-categoria')) {
+            const categoriaId = event.target.getAttribute('data-categoria-id');
+            if (categoriaId) {
+                document.querySelector(`input[name="eliminar_categoria_${categoriaId}"]`).value = 'true';
+            }
+            event.target.closest('.categoria-item').style.display = 'none';
+        }
+    });
+
+    // Mostrar el modal de confirmación
+    document.getElementById('btn-guardar-cambios').addEventListener('click', function() {
+        document.getElementById('confirmModal').classList.remove('hidden');
+    });
+
+    // Ocultar el modal de confirmación
+    document.getElementById('cancelar').addEventListener('click', function() {
+        document.getElementById('confirmModal').classList.add('hidden');
+    });
+
+    // Confirmar y enviar el formulario
+    document.getElementById('confirmar').addEventListener('click', function() {
+        document.getElementById('rubricaForm').submit();
+    });
+});
+</script>
+
+{% endblock %}

@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+
+{% block title %}Registro{% endblock %}
+
+{% block content %}
+<section class="bg-gray-800 dark:bg-gray-900 min-h-screen flex justify-center items-center">
+    <div class="container py-10">
+        <div class="flex justify-center items-center">
+            <div class="w-full max-w-5xl"> <!-- Ancho máximo ajustado a 5xl para mayor ancho -->
+                <div class="bg-white dark:bg-gray-800 shadow-2xl rounded-lg overflow-hidden">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-0">
+                        <!-- Imagen a la izquierda (oculta en pantallas pequeñas) -->
+                        <div class="hidden md:flex justify-center items-center bg-gray-200 dark:bg-gray-700">
+                            <img src="https://scand.de/wp-content/uploads/2023/11/UXUI-main.svg" alt="register form" class="object-cover w-full h-full" />
+                        </div>
+                        <!-- Formulario a la derecha -->
+                        <div class="flex items-center p-8 md:p-10">
+                            <div class="w-full text-gray-900 dark:text-gray-100">
+                                <form action="" method="post">
+                                    {% csrf_token %}
+                                    <div class="flex items-center mb-8">
+                                        <i class="fas fa-tasks text-3xl text-blue-500 dark:text-blue-200 mr-4"></i>
+                                        <span class="text-3xl font-bold">UXEval</span>
+                                    </div>
+
+                                    <h5 class="text-xl font-medium mb-6">Crea una cuenta</h5>
+
+                                    <!-- Campo de Username -->
+                                    <div class="relative mb-6">
+                                        <label for="{{ form.username.id_for_label }}" class="block text-sm font-medium mb-1">Username</label>
+                                        <i class="fas fa-user absolute left-3 top-10 text-gray-400 dark:text-gray-300"></i>
+                                        <input type="text" name="{{ form.username.name }}" id="{{ form.username.id_for_label }}" class="form-input block w-full pl-10 py-3 rounded-lg border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:placeholder-gray-400" required>
+                                        {{ form.username.errors }}
+                                    </div>
+
+                                    <!-- Campo de Password -->
+                                    <div class="relative mb-6">
+                                        <label for="{{ form.password1.id_for_label }}" class="block text-sm font-medium mb-1">Password</label>
+                                        <i class="fas fa-lock absolute left-3 top-10 text-gray-400 dark:text-gray-300"></i>
+                                        <input type="password" name="{{ form.password1.name }}" id="{{ form.password1.id_for_label }}" class="form-input block w-full pl-10 py-3 rounded-lg border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:placeholder-gray-400" required>
+                                        {{ form.password1.errors }}
+                                    </div>
+
+                                    <!-- Campo de Confirmar Password -->
+                                    <div class="relative mb-6">
+                                        <label for="{{ form.password2.id_for_label }}" class="block text-sm font-medium mb-1">Confirmar Password</label>
+                                        <i class="fas fa-lock absolute left-3 top-10 text-gray-400 dark:text-gray-300"></i>
+                                        <input type="password" name="{{ form.password2.name }}" id="{{ form.password2.id_for_label }}" class="form-input block w-full pl-10 py-3 rounded-lg border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:placeholder-gray-400" required>
+                                        {{ form.password2.errors }}
+                                    </div>
+
+                                    <!-- Errores generales -->
+                                    {% if form.non_field_errors %}
+                                        <div class="text-red-500 text-sm mt-2">
+                                            {{ form.non_field_errors }}
+                                        </div>
+                                    {% endif %}
+
+                                    <!-- Botón de Registro -->
+                                    <div class="mb-6">
+                                        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-semibold text-lg transition duration-200">Registrar</button>
+                                    </div>
+
+                                    <!-- Redirección a login -->
+                                    <div class="footer-links text-sm">
+                                        <p class="mb-5 pb-lg-2">¿Ya tienes cuenta? <a href="{% url 'login' %}" class="text-blue-500 dark:text-gray-400">Ingresa aquí</a></p>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+    // Activar modo oscuro si el sistema lo prefiere
+    if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.documentElement.classList.add('dark');
+    }
+</script>
+{% endblock %}
