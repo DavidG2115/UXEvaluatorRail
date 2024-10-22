@@ -70,6 +70,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'evaluatorUx.wsgi.application'
 
+CSRF_TRUSTED_ORIGINS = ['https://uxevaluatorrail-production.up.railway.app']
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
