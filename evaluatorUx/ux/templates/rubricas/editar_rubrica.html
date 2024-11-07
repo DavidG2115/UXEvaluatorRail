@@ -134,57 +134,61 @@
 <script>
 // Lógica para agregar/quitar criterios y categorías dinámicamente
 document.addEventListener('DOMContentLoaded', function() {
-    // Función para agregar un nuevo criterio dinámicamente
-    document.querySelectorAll('.btn-agregar-criterio').forEach(function(btn) {
-        btn.addEventListener('click', function() {
-            const categoriaId = this.getAttribute('data-categoria-id');
-            const tbody = document.getElementById(`criterios-${categoriaId}`);
-            const newCriterio = document.createElement('tr');
-            newCriterio.innerHTML = `
-                <td class="border border-gray-300 p-2 dark:border-gray-600">
-                    <input type="text" name="nuevo_criterio_nombre_${categoriaId}[]" placeholder="Nombre del criterio" class="w-full p-2 border rounded-lg dark:bg-gray-500 dark:text-white">
-                </td>
-                <td class="border border-gray-300 p-2 dark:border-gray-600">
-                    <input type="text" name="nuevo_criterio_descripcion_${categoriaId}[]" placeholder="Descripción del criterio" class="w-full p-2 border rounded-lg dark:bg-gray-500 dark:text-white">
-                </td>
-                <td class="border border-gray-300 p-2 dark:border-gray-600">
-                    <input type="text" name="descripcion_puntaje_nuevo_${categoriaId}_1[]" placeholder="Descripción del puntaje" class="w-full p-2 border rounded-lg dark:bg-gray-500 dark:text-white">
-                </td>
-                <td class="border border-gray-300 p-2 dark:border-gray-600">
-                    <input type="text" name="descripcion_puntaje_nuevo_${categoriaId}_2[]" placeholder="Descripción del puntaje" class="w-full p-2 border rounded-lg dark:bg-gray-500 dark:text-white">
-                </td>
-                <td class="border border-gray-300 p-2 dark:border-gray-600">
-                    <input type="text" name="descripcion_puntaje_nuevo_${categoriaId}_3[]" placeholder="Descripción del puntaje" class="w-full p-2 border rounded-lg dark:bg-gray-500 dark:text-white">
-                </td>
-                <td class="border border-gray-300 p-2 dark:border-gray-600">
-                    <input type="text" name="descripcion_puntaje_nuevo_${categoriaId}_4[]" placeholder="Descripción del puntaje" class="w-full p-2 border rounded-lg dark:bg-gray-500 dark:text-white">
-                </td>
-                <td class="border border-gray-300 p-2 dark:border-gray-600">
-                    <input type="text" name="descripcion_puntaje_nuevo_${categoriaId}_5[]" placeholder="Descripción del puntaje" class="w-full p-2 border rounded-lg dark:bg-gray-500 dark:text-white">
-                </td>
-                <td class="border border-gray-300 p-2 dark:border-gray-600">
-                    <button type="button" class="btn-eliminar-criterio text-red-500 hover:text-red-700">Eliminar</button>
-                </td>
-            `;
-            tbody.appendChild(newCriterio);
-        });
-    });
-
-    // Delegar el evento de clic para eliminar criterios
-    document.getElementById('categorias').addEventListener('click', function(event) {
-        if (event.target.classList.contains('btn-eliminar-criterio')) {
-            const criterioId = event.target.getAttribute('data-criterio-id');
-            if (criterioId) {
-                document.querySelector(`input[name="eliminar_criterio_${criterioId}"]`).value = 'true';
+     // Delegar el evento para agregar criterio, incluyendo categorías nuevas
+     document.getElementById('categorias').addEventListener('click', function(event) {
+        if (event.target.classList.contains('btn-agregar-criterio')) {
+            const categoriaId = event.target.getAttribute('data-categoria-id');
+            let tbody = document.getElementById(`criterios-${categoriaId}`);
+            
+            // Verificar si existe la tabla de criterios para la nueva categoría
+            if (!tbody) {
+                const categoriaDiv = event.target.closest('.categoria-item');
+                const table = categoriaDiv.querySelector('table');
+                tbody = document.createElement('tbody');
+                tbody.setAttribute('id', `criterios-${categoriaId}`);
+                table.appendChild(tbody);
             }
-            event.target.closest('tr').style.display = 'none';
+            
+            agregarCriterio(tbody, categoriaId);
+        }
+
+        // Delegar el evento de eliminar criterio
+        if (event.target.classList.contains('btn-eliminar-criterio')) {
+            event.preventDefault();
+            const criterioRow = event.target.closest('tr');
+            if (criterioRow) {
+                criterioRow.remove();
+            }
         }
     });
+
+    // Función para agregar un nuevo criterio en el tbody especificado
+    function agregarCriterio(tbody, categoriaId) {
+        const newCriterio = document.createElement('tr');
+        newCriterio.innerHTML = `
+            <td class="border border-gray-300 p-2 dark:border-gray-600">
+                <input type="text" name="nuevo_criterio_nombre_${categoriaId}[]" placeholder="Nombre del criterio" class="w-full p-2 border rounded-lg dark:bg-gray-500 dark:text-white">
+            </td>
+            <td class="border border-gray-300 p-2 dark:border-gray-600">
+                <input type="text" name="nuevo_criterio_descripcion_${categoriaId}[]" placeholder="Descripción del criterio" class="w-full p-2 border rounded-lg dark:bg-gray-500 dark:text-white">
+            </td>
+            ${[1, 2, 3, 4, 5].map(puntaje => `
+                <td class="border border-gray-300 p-2 dark:border-gray-600">
+                    <input type="text" name="descripcion_puntaje_nuevo_${categoriaId}_${puntaje}[]" placeholder="Descripción del puntaje" class="w-full p-2 border rounded-lg dark:bg-gray-500 dark:text-white">
+                </td>
+            `).join('')}
+            <td class="border border-gray-300 p-2 dark:border-gray-600">
+                <button type="button" class="btn-eliminar-criterio text-red-500 hover:text-red-700">Eliminar</button>
+            </td>
+        `;
+        tbody.appendChild(newCriterio);
+    }
 
     // Función para agregar una nueva categoría
     document.getElementById('btn-agregar-categoria').addEventListener('click', function() {
         const categoriasDiv = document.getElementById('categorias');
         const newCategoria = document.createElement('div');
+        const newCategoriaId = `new-${Date.now()}`; // Genera un ID único temporal para la categoría
         newCategoria.classList.add('categoria-item', 'mb-4', 'p-4', 'border', 'rounded-lg', 'bg-gray-50', 'dark:bg-gray-700', 'shadow-sm');
         newCategoria.innerHTML = `
             <h4 class="font-bold text-lg mb-2 text-gray-800 dark:text-white">Nueva Categoría</h4>
@@ -192,22 +196,27 @@ document.addEventListener('DOMContentLoaded', function() {
             <input type="text" name="nueva_categoria_descripcion[]" placeholder="Descripción de la categoría" class="w-full p-2 border rounded-lg mb-2 dark:bg-gray-600 dark:text-white">
             <h5 class="font-semibold mt-2 text-gray-800 dark:text-white">Criterios:</h5>
             <table class="min-w-full border-collapse border border-gray-300 mt-2 dark:border-gray-600">
-                <thead>
-                    <tr class="bg-gray-200 dark:bg-gray-600">
-                        <th class="border border-gray-300 p-2 dark:border-gray-600">Nombre del Criterio</th>
-                        <th class="border border-gray-300 p-2 dark:border-gray-600">Descripción</th>
-                        <th class="border border-gray-300 p-2 dark:border-gray-600">Puntaje 1</th>
-                        <th class="border border-gray-300 p-2 dark:border-gray-600">Puntaje 2</th>
-                        <th class="border border-gray-300 p-2 dark:border-gray-600">Puntaje 3</th>
-                        <th class="border border-gray-300 p-2 dark:border-gray-600">Puntaje 4</th>
-                        <th class="border border-gray-300 p-2 dark:border-gray-600">Puntaje 5</th>
-                        <th class="border border-gray-300 p-2 dark:border-gray-600">Acciones</th>
+                <tbody id="criterios-${newCategoriaId}">
+                    <tr>
+                        <td class="border border-gray-300 p-2 dark:border-gray-600">
+                            <input type="text" name="criterio_nuevo_nombre_${newCategoriaId}[]" placeholder="Nombre del criterio" class="w-full p-2 border rounded-lg dark:bg-gray-500 dark:text-white">
+                        </td>
+                        <td class="border border-gray-300 p-2 dark:border-gray-600">
+                            <input type="text" name="criterio_nuevo_descripcion_${newCategoriaId}[]" placeholder="Descripción del criterio" class="w-full p-2 border rounded-lg dark:bg-gray-500 dark:text-white">
+                        </td>
+                        ${[1, 2, 3, 4, 5].map(puntaje => `
+                            <td class="border border-gray-300 p-2 dark:border-gray-600">
+                                <input type="text" name="descripcion_puntaje_nuevo_${newCategoriaId}_${puntaje}[]" placeholder="Descripción del puntaje" class="w-full p-2 border rounded-lg dark:bg-gray-500 dark:text-white">
+                            </td>
+                        `).join('')}
+                        <td class="border border-gray-300 p-2 dark:border-gray-600">
+                            <button type="button" class="btn-eliminar-criterio text-red-500 hover:text-red-700">Eliminar</button>
+                        </td>
                     </tr>
-                </thead>
-                <tbody></tbody>
+                </tbody>
             </table>
             <div class="flex justify-between mt-4">
-                <button type="button" class="btn-agregar-criterio bg-green-500 text-white p-2 rounded-lg hover:bg-green-600">Agregar Criterio</button>
+                <button type="button" class="btn-agregar-criterio bg-green-500 text-white p-2 rounded-lg hover:bg-green-600" data-categoria-id="${newCategoriaId}">Agregar Criterio</button>
                 <button type="button" class="btn-eliminar-categoria bg-red-500 text-white p-2 rounded-lg hover:bg-red-600">Eliminar Categoría</button>
             </div>
         `;

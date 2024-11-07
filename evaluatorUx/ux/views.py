@@ -201,7 +201,7 @@ def editar_rubrica(request, rubrica_id):
         if rubrica_form.is_valid():
             rubrica_form.save()
 
-            # Guardar cambios de las categorías
+            # Guardar cambios de las categorías existentes
             categorias = Categoria.objects.filter(rubrica=rubrica)
 
             for categoria in categorias:
@@ -245,27 +245,32 @@ def editar_rubrica(request, rubrica_id):
             nuevas_categorias_nombres = request.POST.getlist('nueva_categoria_nombre[]')
             nuevas_categorias_descripciones = request.POST.getlist('nueva_categoria_descripcion[]')
 
-            for nombre, descripcion in zip(nuevas_categorias_nombres, nuevas_categorias_descripciones):
+            for index, (nombre, descripcion) in enumerate(zip(nuevas_categorias_nombres, nuevas_categorias_descripciones)):
                 if nombre:  # Solo crea si no está vacío
                     nueva_categoria = Categoria.objects.create(rubrica=rubrica, nombre=nombre, descripcion=descripcion)
 
-                    # Crear nuevos criterios para la nueva categoría
-                    nuevos_criterios_nombres = request.POST.getlist(f'nuevo_criterio_nombre_{nueva_categoria.id}[]')
-                    nuevos_criterios_descripciones = request.POST.getlist(f'nuevo_criterio_descripcion_{nueva_categoria.id}[]')
+                    # Detectar todos los IDs dinámicos de criterios nuevos para esta categoría
+                    for key in request.POST.keys():
+                        if key.startswith(f'criterio_nuevo_nombre_new-{index}'):
+                            new_criterio_id = key.split('_')[-1]  # Extraer el ID único
 
-                    for criterio_nombre, criterio_descripcion in zip(nuevos_criterios_nombres, nuevos_criterios_descripciones):
-                        if criterio_nombre:
-                            nuevo_criterio = Criterio.objects.create(categoria=nueva_categoria, nombre=criterio_nombre, descripcion=criterio_descripcion)
+                            # Obtener los nombres y descripciones de criterios nuevos
+                            nuevos_criterios_nombres = request.POST.getlist(f'criterio_nuevo_nombre_{new_criterio_id}[]')
+                            nuevos_criterios_descripciones = request.POST.getlist(f'criterio_nuevo_descripcion_{new_criterio_id}[]')
 
-                            # Crear descripciones de puntajes para el nuevo criterio
-                            for puntaje in range(1, 6):
-                                descripcion_puntaje = request.POST.get(f'descripcion_puntaje_nuevo_{nueva_categoria.id}_{puntaje}[]')
-                                if descripcion_puntaje:
-                                    DescripcionPuntaje.objects.create(
-                                        criterio=nuevo_criterio,
-                                        puntaje=puntaje,
-                                        descripcion=descripcion_puntaje
-                                    )
+                            for criterio_nombre, criterio_descripcion in zip(nuevos_criterios_nombres, nuevos_criterios_descripciones):
+                                if criterio_nombre:
+                                    nuevo_criterio = Criterio.objects.create(categoria=nueva_categoria, nombre=criterio_nombre, descripcion=criterio_descripcion)
+
+                                    # Guardar descripciones de puntajes para el nuevo criterio
+                                    for puntaje in range(1, 6):
+                                        descripcion_puntaje = request.POST.get(f'descripcion_puntaje_nuevo_{new_criterio_id}_{puntaje}[]')
+                                        if descripcion_puntaje:
+                                            DescripcionPuntaje.objects.create(
+                                                criterio=nuevo_criterio,
+                                                puntaje=puntaje,
+                                                descripcion=descripcion_puntaje
+                                            )
 
             # Crear nuevos criterios para las categorías existentes
             for categoria in categorias:

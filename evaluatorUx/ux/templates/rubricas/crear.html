@@ -43,11 +43,13 @@
     document.addEventListener('DOMContentLoaded', function() {
         let categoriaCount = 0;
         document.getElementById('categorias_count').value = categoriaCount;
-    
+        
         document.getElementById('btn-agregar-categoria').addEventListener('click', function() {
             const categoriasDiv = document.getElementById('categorias');
+            const newCategoriaId = `categoria-${categoriaCount}`;
             const newCategoria = document.createElement('div');
             newCategoria.classList.add('categoria-item', 'mb-4', 'p-4', 'border', 'rounded-lg', 'bg-gray-50', 'dark:bg-gray-700', 'shadow-sm');
+            newCategoria.setAttribute('id', newCategoriaId);
             newCategoria.innerHTML = `
                 <h4 class="font-bold text-lg mb-2 text-gray-800 dark:text-white">Nueva Categoría</h4>
                 <input type="text" name="categoria_${categoriaCount}_nombre" placeholder="Nombre de la categoría" class="w-full p-2 border rounded-lg mb-2 dark:bg-gray-600 dark:text-white">
@@ -72,19 +74,23 @@
                 <button type="button" class="btn-agregar-criterio bg-green-500 text-white p-2 rounded-lg hover:bg-green-600" data-categoria-id="${categoriaCount}">
                     Agregar Criterio
                 </button>
+                <button type="button" class="btn-eliminar-categoria bg-red-500 text-white p-2 rounded-lg hover:bg-red-600 mt-2" data-categoria-id="${newCategoriaId}">
+                    Eliminar Categoría
+                </button>
             `;
             categoriasDiv.appendChild(newCategoria);
             categoriaCount++;
             document.getElementById('categorias_count').value = categoriaCount;
         });
-    
+
+        // Agregar un criterio a una categoría específica
         document.getElementById('categorias').addEventListener('click', function(event) {
             if (event.target.classList.contains('btn-agregar-criterio')) {
                 const categoriaId = event.target.getAttribute('data-categoria-id');
                 const criteriosCountField = document.getElementById(`criterios_count_${categoriaId}`);
                 let criterioCount = parseInt(criteriosCountField.value);
                 criteriosCountField.value = criterioCount + 1;
-    
+
                 const tbody = document.getElementById(`criterios-${categoriaId}`);
                 const newCriterio = document.createElement('tr');
                 newCriterio.innerHTML = `
@@ -106,25 +112,52 @@
                 tbody.appendChild(newCriterio);
             }
         });
-    
+
+        // Eliminar un criterio específico
         document.getElementById('categorias').addEventListener('click', function(event) {
             if (event.target.classList.contains('btn-eliminar-criterio')) {
                 event.target.closest('tr').remove();
             }
         });
-    
-        // Abrir el modal de confirmación cuando se haga clic en "Guardar Rúbrica"
+
+        // Variables para la eliminación de categoría
+        let categoriaAEliminar = null;
+
+        // Abrir modal de confirmación para eliminar categoría
+        document.getElementById('categorias').addEventListener('click', function(event) {
+            if (event.target.classList.contains('btn-eliminar-categoria')) {
+                categoriaAEliminar = event.target.getAttribute('data-categoria-id');
+                document.getElementById('confirmDeleteModal').classList.remove('hidden');
+            }
+        });
+
+        // Confirmar eliminación de categoría
+        document.getElementById('confirmarEliminar').addEventListener('click', function() {
+            if (categoriaAEliminar) {
+                document.getElementById(categoriaAEliminar).remove();
+                categoriaAEliminar = null;
+            }
+            document.getElementById('confirmDeleteModal').classList.add('hidden');
+        });
+
+        // Cancelar eliminación de categoría
+        document.getElementById('cancelarEliminar').addEventListener('click', function() {
+            categoriaAEliminar = null;
+            document.getElementById('confirmDeleteModal').classList.add('hidden');
+        });
+
+        // Abrir modal de confirmación para guardar rúbrica
         document.getElementById('btn-guardar-cambios').addEventListener('click', function(event) {
-            event.preventDefault(); // Evita que el formulario se envíe al hacer clic
+            event.preventDefault();
             document.getElementById('confirmModal').classList.remove('hidden');
         });
-    
-        // Enviar el formulario solo cuando se confirme en el modal
+
+        // Confirmar guardar rúbrica
         document.getElementById('confirmar').addEventListener('click', function() {
             document.getElementById('rubricaForm').submit();
         });
-    
-        // Ocultar el modal cuando se cancela
+
+        // Cancelar guardar rúbrica
         document.getElementById('cancelar').addEventListener('click', function() {
             document.getElementById('confirmModal').classList.add('hidden');
         });
@@ -139,6 +172,18 @@
         <div class="flex justify-end">
             <button id="cancelar" class="mr-2 bg-gray-500 text-white py-2 px-4 rounded-lg hover:bg-gray-600">Cancelar</button>
             <button id="confirmar" class="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600">Confirmar</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de confirmación para eliminar una categoría -->
+<div id="confirmDeleteModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden">
+    <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg">
+        <h2 class="text-xl font-bold mb-4 text-gray-800 dark:text-white">Confirmar Eliminación</h2>
+        <p class="mb-4 text-gray-700 dark:text-gray-300">¿Estás seguro de que deseas eliminar esta categoría?</p>
+        <div class="flex justify-end">
+            <button id="cancelarEliminar" class="mr-2 bg-gray-500 text-white py-2 px-4 rounded-lg hover:bg-gray-600">Cancelar</button>
+            <button id="confirmarEliminar" class="bg-red-500 text-white py-2 px-4 rounded-lg hover:bg-red-600">Eliminar</button>
         </div>
     </div>
 </div>
