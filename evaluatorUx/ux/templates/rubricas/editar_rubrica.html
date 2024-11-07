@@ -72,11 +72,39 @@
             {% endfor %}
         </div>
 
-        <button type="button" id="btn-agregar-categoria" class="mt-4 p-2 bg-green-500 text-white rounded-lg hover:bg-green-600">Agregar Categoría</button>
-
-        <button type="button" id="btn-guardar-cambios" class="mt-4 p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">Guardar cambios</button>
-        <button type="button" onclick="window.location.href = '{% url 'ver_rubrica' rubrica.id %}'" class="mt-4 p-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600">Cancelar</button>
+        
+        <!-- Botones principales -->
+        <div class="flex justify-between mt-4">
+            <button type="button" id="btn-agregar-categoria" class="p-2 bg-green-500 text-white rounded-lg hover:bg-green-600">
+                Agregar Categoría
+            </button>
+            
+            <button type="button" id="btn-guardar-cambios" class="p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
+                Guardar cambios
+            </button>
+            
+            <button type="button" id="btn-cancelar" class="p-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600">
+                Cancelar
+            </button>
+        </div>
+        
     </form>
+</div>
+
+<!-- Modal de Confirmación de Cancelación -->
+<div id="cancelModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden">
+    <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg max-w-sm w-full">
+        <h2 class="text-xl font-bold mb-4 text-gray-800 dark:text-white">Confirmar Cancelación</h2>
+        <p class="mb-4 text-gray-700 dark:text-gray-300">¿Estás seguro de que deseas cancelar? Todos los cambios no guardados se perderán.</p>
+        <div class="flex justify-end">
+            <button id="closeModal" class="mr-2 px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600">
+                No, regresar
+            </button>
+            <button id="confirmCancel" class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600">
+                Sí, cancelar
+            </button>
+        </div>
+    </div>
 </div>
 
 <!-- Modal -->
@@ -201,7 +229,29 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('confirmar').addEventListener('click', function() {
         document.getElementById('rubricaForm').submit();
     });
+
+    // Seleccionar los elementos del modal
+    const cancelModal = document.getElementById('cancelModal');
+    const btnCancel = document.getElementById('btn-cancelar');
+    const btnCloseModal = document.getElementById('closeModal');
+    const btnConfirmCancel = document.getElementById('confirmCancel');
+
+    // Mostrar el modal cuando se hace clic en "Cancelar"
+    btnCancel.addEventListener('click', () => {
+        cancelModal.classList.remove('hidden');
+    });
+
+    // Cerrar el modal cuando se hace clic en "No, regresar"
+    btnCloseModal.addEventListener('click', () => {
+        cancelModal.classList.add('hidden');
+    });
+
+    // Redirigir al usuario cuando confirme la cancelación
+    btnConfirmCancel.addEventListener('click', () => {
+        window.location.href = '{% url "ver_rubrica" rubrica.id %}';
+    });
 });
+
 document.addEventListener('DOMContentLoaded', function() {
     let categoriaIdAEliminar = null;
 
@@ -231,9 +281,7 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('confirmDeleteModal').classList.add('hidden');
             categoriaIdAEliminar = null;
         }
-    });
-});
-</script>
+    }); 
 });
 </script>
 

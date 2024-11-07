@@ -68,8 +68,13 @@
                                     {% endif %}
                                 </td>
                                 <td class="border border-gray-300 p-2 dark:border-gray-600 text-gray-800 dark:text-white">
-                                    <select name="criterio_{{ criterio_info.criterio.id }}" id="criterio_{{ criterio_info.criterio.id }}" class="bg-white dark:bg-gray-700 text-gray-800 dark:text-white border border-gray-300 dark:border-gray-600 rounded-lg" required>
-                                        <option value="" selected>Seleccione una calificación</option>
+                                    <select 
+                                        name="criterio_{{ criterio_info.criterio.id }}" 
+                                        id="criterio_{{ criterio_info.criterio.id }}" 
+                                        class="w-full p-2 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 ease-in-out" 
+                                        required
+                                    >
+                                        <option value="" selected disabled class="text-gray-500 dark:text-gray-400">Seleccione una calificación</option>
                                         <option value="1">Muy Deficiente</option>
                                         <option value="2">Deficiente</option>
                                         <option value="3">Aceptable</option>
