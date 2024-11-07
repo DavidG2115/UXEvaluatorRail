@@ -28,122 +28,107 @@
             <!-- Aquí se agregarán dinámicamente las categorías y criterios -->
         </div>
 
+        <input type="hidden" name="categorias_count" id="categorias_count" value="0">
+
         <button type="button" id="btn-agregar-categoria" class="mt-4 p-2 bg-green-500 text-white rounded-lg hover:bg-green-600">Agregar Categoría</button>
 
         <div class="flex justify-between mt-6">
-            <button type="button" id="btn-guardar-cambios" class="p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">Guardar Rúbrica</button>
+            <button type="submit" id="btn-guardar-cambios" class="p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">Guardar Rúbrica</button>
             <button type="button" onclick="window.location.href = '{% url 'seleccionar_rubrica' %}'" class="p-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600">Cancelar</button>
         </div>
     </form>
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    let categoriaCount = 0;
-
-    // Función para agregar una nueva categoría
-    document.getElementById('btn-agregar-categoria').addEventListener('click', function() {
-        categoriaCount++;
-        const categoriasDiv = document.getElementById('categorias');
-        const newCategoria = document.createElement('div');
-        newCategoria.classList.add('categoria-item', 'mb-4', 'p-4', 'border', 'rounded-lg', 'bg-gray-50', 'dark:bg-gray-700', 'shadow-sm');
-        newCategoria.innerHTML = `
-            <h4 class="font-bold text-lg mb-2 text-gray-800 dark:text-white">Nueva Categoría</h4>
-            <input type="text" name="nueva_categoria_nombre_${categoriaCount}" placeholder="Nombre de la categoría" class="w-full p-2 border rounded-lg mb-2 dark:bg-gray-600 dark:text-white">
-            <input type="text" name="nueva_categoria_descripcion_${categoriaCount}" placeholder="Descripción de la categoría" class="w-full p-2 border rounded-lg mb-2 dark:bg-gray-600 dark:text-white">
-            <h5 class="font-semibold mt-2 text-gray-800 dark:text-white">Criterios:</h5>
-            <table class="min-w-full border-collapse border border-gray-300 mt-2 dark:border-gray-600">
-                <thead>
-                    <tr class="bg-gray-200 dark:bg-gray-600">
-                        <th class="border border-gray-300 p-2 dark:border-gray-600">Nombre del Criterio</th>
-                        <th class="border border-gray-300 p-2 dark:border-gray-600">Descripción</th>
-                        <th class="border border-gray-300 p-2 dark:border-gray-600">Puntaje 1</th>
-                        <th class="border border-gray-300 p-2 dark:border-gray-600">Puntaje 2</th>
-                        <th class="border border-gray-300 p-2 dark:border-gray-600">Puntaje 3</th>
-                        <th class="border border-gray-300 p-2 dark:border-gray-600">Puntaje 4</th>
-                        <th class="border border-gray-300 p-2 dark:border-gray-600">Puntaje 5</th>
-                        <th class="border border-gray-300 p-2 dark:border-gray-600">Acciones</th>
-                    </tr>
-                </thead>
-                <tbody id="criterios-${categoriaCount}"></tbody>
-            </table>
-            <div class="flex justify-between mt-4">
+    document.addEventListener('DOMContentLoaded', function() {
+        let categoriaCount = 0;
+        document.getElementById('categorias_count').value = categoriaCount;
+    
+        document.getElementById('btn-agregar-categoria').addEventListener('click', function() {
+            const categoriasDiv = document.getElementById('categorias');
+            const newCategoria = document.createElement('div');
+            newCategoria.classList.add('categoria-item', 'mb-4', 'p-4', 'border', 'rounded-lg', 'bg-gray-50', 'dark:bg-gray-700', 'shadow-sm');
+            newCategoria.innerHTML = `
+                <h4 class="font-bold text-lg mb-2 text-gray-800 dark:text-white">Nueva Categoría</h4>
+                <input type="text" name="categoria_${categoriaCount}_nombre" placeholder="Nombre de la categoría" class="w-full p-2 border rounded-lg mb-2 dark:bg-gray-600 dark:text-white">
+                <input type="text" name="categoria_${categoriaCount}_descripcion" placeholder="Descripción de la categoría" class="w-full p-2 border rounded-lg mb-2 dark:bg-gray-600 dark:text-white">
+                <input type="hidden" name="criterios_count_${categoriaCount}" id="criterios_count_${categoriaCount}" value="0">
+                <h5 class="font-semibold mt-2 text-gray-800 dark:text-white">Criterios:</h5>
+                <table class="min-w-full border-collapse border border-gray-300 mt-2 dark:border-gray-600">
+                    <thead>
+                        <tr class="bg-gray-200 dark:bg-gray-600">
+                            <th class="border border-gray-300 p-2 dark:border-gray-600">Nombre del Criterio</th>
+                            <th class="border border-gray-300 p-2 dark:border-gray-600">Descripción</th>
+                            <th class="border border-gray-300 p-2 dark:border-gray-600">Puntaje 1</th>
+                            <th class="border border-gray-300 p-2 dark:border-gray-600">Puntaje 2</th>
+                            <th class="border border-gray-300 p-2 dark:border-gray-600">Puntaje 3</th>
+                            <th class="border border-gray-300 p-2 dark:border-gray-600">Puntaje 4</th>
+                            <th class="border border-gray-300 p-2 dark:border-gray-600">Puntaje 5</th>
+                            <th class="border border-gray-300 p-2 dark:border-gray-600">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="criterios-${categoriaCount}"></tbody>
+                </table>
                 <button type="button" class="btn-agregar-criterio bg-green-500 text-white p-2 rounded-lg hover:bg-green-600" data-categoria-id="${categoriaCount}">
                     Agregar Criterio
                 </button>
-                <button type="button" class="btn-eliminar-categoria bg-red-500 text-white p-2 rounded-lg hover:bg-red-600" data-categoria-id="${categoriaCount}">
-                    Eliminar Categoría
-                </button>
-            </div>
-        `;
-        categoriasDiv.appendChild(newCategoria);
-    });
-
-    // Delegar el evento de clic para agregar criterios
-    document.getElementById('categorias').addEventListener('click', function(event) {
-        if (event.target.classList.contains('btn-agregar-criterio')) {
-            const categoriaId = event.target.getAttribute('data-categoria-id');
-            const tbody = document.getElementById(`criterios-${categoriaId}`);
-            const newCriterio = document.createElement('tr');
-            newCriterio.innerHTML = `
-                <td class="border border-gray-300 p-2 dark:border-gray-600">
-                    <input type="text" name="nuevo_criterio_nombre_${categoriaId}[]" placeholder="Nombre del criterio" class="w-full p-2 border rounded-lg dark:bg-gray-500 dark:text-white">
-                </td>
-                <td class="border border-gray-300 p-2 dark:border-gray-600">
-                    <input type="text" name="nuevo_criterio_descripcion_${categoriaId}[]" placeholder="Descripción del criterio" class="w-full p-2 border rounded-lg dark:bg-gray-500 dark:text-white">
-                </td>
-                <td class="border border-gray-300 p-2 dark:border-gray-600">
-                    <input type="text" name="descripcion_puntaje_nuevo_${categoriaId}_1[]" placeholder="Descripción del puntaje" class="w-full p-2 border rounded-lg dark:bg-gray-500 dark:text-white">
-                </td>
-                <td class="border border-gray-300 p-2 dark:border-gray-600">
-                    <input type="text" name="descripcion_puntaje_nuevo_${categoriaId}_2[]" placeholder="Descripción del puntaje" class="w-full p-2 border rounded-lg dark:bg-gray-500 dark:text-white">
-                </td>
-                <td class="border border-gray-300 p-2 dark:border-gray-600">
-                    <input type="text" name="descripcion_puntaje_nuevo_${categoriaId}_3[]" placeholder="Descripción del puntaje" class="w-full p-2 border rounded-lg dark:bg-gray-500 dark:text-white">
-                </td>
-                <td class="border border-gray-300 p-2 dark:border-gray-600">
-                    <input type="text" name="descripcion_puntaje_nuevo_${categoriaId}_4[]" placeholder="Descripción del puntaje" class="w-full p-2 border rounded-lg dark:bg-gray-500 dark:text-white">
-                </td>
-                <td class="border border-gray-300 p-2 dark:border-gray-600">
-                    <input type="text" name="descripcion_puntaje_nuevo_${categoriaId}_5[]" placeholder="Descripción del puntaje" class="w-full p-2 border rounded-lg dark:bg-gray-500 dark:text-white">
-                </td>
-                <td class="border border-gray-300 p-2 dark:border-gray-600">
-                    <button type="button" class="btn-eliminar-criterio text-red-500 hover:text-red-700">Eliminar</button>
-                </td>
             `;
-            tbody.appendChild(newCriterio);
-        }
+            categoriasDiv.appendChild(newCategoria);
+            categoriaCount++;
+            document.getElementById('categorias_count').value = categoriaCount;
+        });
+    
+        document.getElementById('categorias').addEventListener('click', function(event) {
+            if (event.target.classList.contains('btn-agregar-criterio')) {
+                const categoriaId = event.target.getAttribute('data-categoria-id');
+                const criteriosCountField = document.getElementById(`criterios_count_${categoriaId}`);
+                let criterioCount = parseInt(criteriosCountField.value);
+                criteriosCountField.value = criterioCount + 1;
+    
+                const tbody = document.getElementById(`criterios-${categoriaId}`);
+                const newCriterio = document.createElement('tr');
+                newCriterio.innerHTML = `
+                    <td class="border border-gray-300 p-2 dark:border-gray-600">
+                        <input type="text" name="criterio_${categoriaId}_${criterioCount}_nombre" placeholder="Nombre del criterio" class="w-full p-2 border rounded-lg dark:bg-gray-500 dark:text-white">
+                    </td>
+                    <td class="border border-gray-300 p-2 dark:border-gray-600">
+                        <input type="text" name="criterio_${categoriaId}_${criterioCount}_descripcion" placeholder="Descripción del criterio" class="w-full p-2 border rounded-lg dark:bg-gray-500 dark:text-white">
+                    </td>
+                    ${Array.from({length: 5}, (_, i) => `
+                        <td class="border border-gray-300 p-2 dark:border-gray-600">
+                            <input type="text" name="criterio_${categoriaId}_${criterioCount}_puntaje_${i + 1}" placeholder="Descripción del puntaje" class="w-full p-2 border rounded-lg dark:bg-gray-500 dark:text-white">
+                        </td>
+                    `).join('')}
+                    <td class="border border-gray-300 p-2 dark:border-gray-600">
+                        <button type="button" class="btn-eliminar-criterio text-red-500 hover:text-red-700">Eliminar</button>
+                    </td>
+                `;
+                tbody.appendChild(newCriterio);
+            }
+        });
+    
+        document.getElementById('categorias').addEventListener('click', function(event) {
+            if (event.target.classList.contains('btn-eliminar-criterio')) {
+                event.target.closest('tr').remove();
+            }
+        });
+    
+        // Abrir el modal de confirmación cuando se haga clic en "Guardar Rúbrica"
+        document.getElementById('btn-guardar-cambios').addEventListener('click', function(event) {
+            event.preventDefault(); // Evita que el formulario se envíe al hacer clic
+            document.getElementById('confirmModal').classList.remove('hidden');
+        });
+    
+        // Enviar el formulario solo cuando se confirme en el modal
+        document.getElementById('confirmar').addEventListener('click', function() {
+            document.getElementById('rubricaForm').submit();
+        });
+    
+        // Ocultar el modal cuando se cancela
+        document.getElementById('cancelar').addEventListener('click', function() {
+            document.getElementById('confirmModal').classList.add('hidden');
+        });
     });
-
-    // Delegar el evento de clic para eliminar criterios
-    document.getElementById('categorias').addEventListener('click', function(event) {
-        if (event.target.classList.contains('btn-eliminar-criterio')) {
-            event.target.closest('tr').remove();
-        }
-    });
-
-    // Delegar el evento de clic para eliminar categorías
-    document.getElementById('categorias').addEventListener('click', function(event) {
-        if (event.target.classList.contains('btn-eliminar-categoria')) {
-            event.target.closest('.categoria-item').remove();
-        }
-    });
-
-    // Mostrar el modal de confirmación
-    document.getElementById('btn-guardar-cambios').addEventListener('click', function() {
-        document.getElementById('confirmModal').classList.remove('hidden');
-    });
-
-    // Ocultar el modal de confirmación
-    document.getElementById('cancelar').addEventListener('click', function() {
-        document.getElementById('confirmModal').classList.add('hidden');
-    });
-
-    // Confirmar y enviar el formulario
-    document.getElementById('confirmar').addEventListener('click', function() {
-        document.getElementById('rubricaForm').submit();
-    });
-});
 </script>
 
 <!-- Modal de confirmación -->

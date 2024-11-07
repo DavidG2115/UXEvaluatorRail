@@ -99,7 +99,7 @@ def crear_rubrica(request):
                 return redirect('editar_rubrica', rubrica_id=rubrica.id)
 
         else:
-            # Crear una nueva rúbrica desde cero
+            # Crear una nueva rúbrica desde ce_
             nombre_rubrica = request.POST.get('nombre_rubrica')
             descripcion_rubrica = request.POST.get('descripcion_rubrica')
 
@@ -110,19 +110,19 @@ def crear_rubrica(request):
 
             # Iterar sobre las categorías dinámicas
             for i in range(categorias_count):
-                nombre_categoria = request.POST.get(f'categorias-{i}-nombre')
-                descripcion_categoria = request.POST.get(f'categorias-{i}-descripcion')
+                nombre_categoria = request.POST.get(f'categoria_{i}_nombre')
+                descripcion_categoria = request.POST.get(f'categoria_{i}_descripcion')
 
                 if nombre_categoria:  # Asegurarse de que el nombre no esté vacío
                     categoria = Categoria.objects.create(rubrica=rubrica, nombre=nombre_categoria, descripcion=descripcion_categoria)
 
                     # Obtener el número de criterios para esta categoría
-                    criterios_count = int(request.POST.get(f'criterios_count-{i}', 0))
+                    criterios_count = int(request.POST.get(f'criterios_count_{i}', 0))
 
                     # Iterar sobre los criterios dinámicos
                     for j in range(criterios_count):
-                        nombre_criterio = request.POST.get(f'criterios-{i}-{j}-nombre')
-                        descripcion_criterio = request.POST.get(f'criterios-{i}-{j}-descripcion')
+                        nombre_criterio = request.POST.get(f'criterio_{i}_{j}_nombre')
+                        descripcion_criterio = request.POST.get(f'criterio_{i}_{j}_descripcion')
 
                         if nombre_criterio:  # Asegurarse de que el nombre del criterio no esté vacío
                             criterio = Criterio.objects.create(
@@ -133,7 +133,7 @@ def crear_rubrica(request):
 
                             # Crear las descripciones de los puntajes
                             for puntaje in range(1, 6):  # Puntajes del 1 al 5
-                                descripcion_puntaje = request.POST.get(f'criterios-{i}-{j}-puntaje-{puntaje}')
+                                descripcion_puntaje = request.POST.get(f'criterio_{i}_{j}_puntaje_{puntaje}')
                                 if descripcion_puntaje:
                                     DescripcionPuntaje.objects.create(
                                         criterio=criterio,
